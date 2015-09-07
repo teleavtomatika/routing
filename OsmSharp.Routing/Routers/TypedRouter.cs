@@ -1802,6 +1802,10 @@ namespace OsmSharp.Routing.Routers
                         previousId = currentId;
                     }
                     var resolvedShortest = this.ResolvedShortest(vehicle, previousId, vertex2);
+                    if(resolvedShortest == null)
+                    { // something is wrong here.
+                        return null;
+                    }
                     path = resolvedShortest.ConcatenateAfter(path);
                 }
             }

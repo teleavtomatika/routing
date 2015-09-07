@@ -784,12 +784,12 @@ namespace OsmSharp.Routing.CH
 
             // keep a list of distances to the given vertices while doing backward search.
             var buckets = new Dictionary<long, Dictionary<long, double>>();
-            var targetIds = new long[sources.Length];
+            var targetIds = new long[targets.Length];
             double latestProgress = 0;
-            for (int idx = 0; idx < sources.Length; idx++)
+            for (int idx = 0; idx < targets.Length; idx++)
             {
                 targetIds[idx] =
-                    this.SearchBackwardIntoBucket(graph, buckets, sources[idx]);
+                    this.SearchBackwardIntoBucket(graph, buckets, targets[idx]);
 
                 float progress = (float)System.Math.Round((((double)idx / (double)targets.Length) * 100));
                 if (progress != latestProgress)
