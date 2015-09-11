@@ -872,7 +872,7 @@ namespace OsmSharp.Routing.Graph
             // deserialize tags.
             stream.Seek(position, System.IO.SeekOrigin.Begin);
             var tagsIndex = global::OsmSharp.Collections.Tags.Index.TagsIndex.Deserialize(
-                new LimitedStream(stream));
+                new LimitedStream(stream), copy);
 
             return new RouterDataSource<TEdgeData>(graph, tagsIndex);
         }
