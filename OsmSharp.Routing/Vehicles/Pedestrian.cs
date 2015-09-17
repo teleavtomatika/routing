@@ -90,6 +90,7 @@ namespace OsmSharp.Routing.Vehicles
         {
             switch (highwayType)
             {
+                case "service":
                 case "services":
                 case "proposed":
                 case "cycleway":
