@@ -75,15 +75,13 @@ namespace OsmSharp.Routing.Vehicles
 
         /// <summary>
         /// Returns the Max Speed for the highwaytype in Km/h.
-        /// 
-        /// This does not take into account how fast this vehicle can go just the max possible speed.
         /// </summary>
-        /// <param name="highwayType"></param>
         /// <returns></returns>
         public override KilometerPerHour MaxSpeedAllowed(string highwayType)
         {
             switch (highwayType)
             {
+                case "service":    
                 case "services":
                 case "proposed":
                 case "cycleway":
