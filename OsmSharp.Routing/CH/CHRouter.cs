@@ -1590,7 +1590,7 @@ namespace OsmSharp.Routing.CH
             var closestWithoutMatch = new SearchClosestResult<CHEdgeData>(double.MaxValue, 0);
 
             //GeoCoordinateBox closestWithMatchBox = null;
-            GeoCoordinateBox closestWithoutMatchBox = null;
+            //GeoCoordinateBox closestWithoutMatchBox = null;
 
             var emtpyCoordinates = new ICoordinate[0];
 
@@ -1631,16 +1631,16 @@ namespace OsmSharp.Routing.CH
                         graph.GetVertex(edges.Vertex2, out toLatitude, out toLongitude))
                     { // return the vertex.
                         var fromCoordinate = new GeoCoordinate(fromLatitude, fromLongitude);
-                        if (closestWithoutMatchBox == null ||
-                            closestWithoutMatchBox.Contains(fromCoordinate))
-                        { // the from coordinate is potentially closer.
+                        //if (closestWithoutMatchBox == null ||
+                        //    closestWithoutMatchBox.Contains(fromCoordinate))
+                        //{ // the from coordinate is potentially closer.
                             distance = coordinate.DistanceReal(fromCoordinate).Value;
 
                             if (distance < distanceEpsilon.Value)
                             { // the distance is smaller than the tolerance value.
                                 var diff = coordinate - fromCoordinate;
-                                closestWithoutMatchBox = new GeoCoordinateBox(new GeoCoordinate(coordinate + diff),
-                                    new GeoCoordinate(coordinate - diff));
+                                //closestWithoutMatchBox = new GeoCoordinateBox(new GeoCoordinate(coordinate + diff),
+                                //    new GeoCoordinate(coordinate - diff));
                                 closestWithoutMatch = new SearchClosestResult<CHEdgeData>(
                                     distance, edges.Vertex1);
                                 if (matcher == null ||
@@ -1655,8 +1655,8 @@ namespace OsmSharp.Routing.CH
                             if (distance < closestWithoutMatch.Distance)
                             { // the distance is smaller for the without match.
                                 var diff = coordinate - fromCoordinate;
-                                closestWithoutMatchBox = new GeoCoordinateBox(new GeoCoordinate(coordinate + diff),
-                                    new GeoCoordinate(coordinate - diff));
+                                //closestWithoutMatchBox = new GeoCoordinateBox(new GeoCoordinate(coordinate + diff),
+                                //    new GeoCoordinate(coordinate - diff));
                                 closestWithoutMatch = new SearchClosestResult<CHEdgeData>(
                                     distance, edges.Vertex1);
                             }
@@ -1670,18 +1670,18 @@ namespace OsmSharp.Routing.CH
                                         distance, edges.Vertex1);
                                 }
                             }
-                        }
+                        //}
                         var toCoordinate = new GeoCoordinate(toLatitude, toLongitude);
-                        if (closestWithoutMatchBox == null ||
-                            closestWithoutMatchBox.Contains(toCoordinate))
-                        { // the to coordinate is potentially closer.
+                        //if (closestWithoutMatchBox == null ||
+                        //    closestWithoutMatchBox.Contains(toCoordinate))
+                        //{ // the to coordinate is potentially closer.
                             distance = coordinate.DistanceReal(toCoordinate).Value;
 
                             if (distance < distanceEpsilon.Value)
                             { // the distance is smaller than the tolerance value.
                                 var diff = coordinate - toCoordinate;
-                                closestWithoutMatchBox = new GeoCoordinateBox(new GeoCoordinate(coordinate + diff),
-                                    new GeoCoordinate(coordinate - diff));
+                                //closestWithoutMatchBox = new GeoCoordinateBox(new GeoCoordinate(coordinate + diff),
+                                //    new GeoCoordinate(coordinate - diff));
                                 closestWithoutMatch = new SearchClosestResult<CHEdgeData>(
                                     distance, edges.Vertex2);
                                 if (matcher == null ||
@@ -1697,8 +1697,8 @@ namespace OsmSharp.Routing.CH
                             if (distance < closestWithoutMatch.Distance)
                             { // the distance is smaller for the without match.
                                 var diff = coordinate - toCoordinate;
-                                closestWithoutMatchBox = new GeoCoordinateBox(new GeoCoordinate(coordinate + diff),
-                                    new GeoCoordinate(coordinate - diff));
+                                //closestWithoutMatchBox = new GeoCoordinateBox(new GeoCoordinate(coordinate + diff),
+                                //    new GeoCoordinate(coordinate - diff));
                                 closestWithoutMatch = new SearchClosestResult<CHEdgeData>(
                                     distance, edges.Vertex2);
                             }
@@ -1712,14 +1712,14 @@ namespace OsmSharp.Routing.CH
                                         distance, edges.Vertex2);
                                 }
                             }
-                        }
+                        //}
 
                         // search along the line.
                         var previous = fromCoordinate;
                         var intermediatesBox = new GeoCoordinateBox(fromCoordinate, toCoordinate);
-                        if (!edges.EdgeData.ShapeInBox ||
-                            intermediatesBox.Overlaps(closestWithoutMatchBox))
-                        { // only test when overlap or shape is larger.
+                        //if (!edges.EdgeData.ShapeInBox ||
+                        //    intermediatesBox.Overlaps(closestWithoutMatchBox))
+                        //{ // only test when overlap or shape is larger.
                             var intermediates = edges.Intermediates;
                             var coordinatesArray = emtpyCoordinates;
                             if (intermediates != null)
@@ -1733,10 +1733,10 @@ namespace OsmSharp.Routing.CH
                                 }
                             }
 
-                            if (closestWithoutMatchBox == null ||
-                                closestWithoutMatchBox.Overlaps(intermediatesBox) ||
-                                intermediatesBox.Overlaps(closestWithoutMatchBox))
-                            {
+                            //if (closestWithoutMatchBox == null ||
+                            //    closestWithoutMatchBox.Overlaps(intermediatesBox) ||
+                            //    intermediatesBox.Overlaps(closestWithoutMatchBox))
+                            //{
                                 // loop over all edges that are represented by this arc (counting intermediate coordinates).
                                 GeoCoordinateLine line;
                                 var distanceToSegment = 0.0;
@@ -1748,9 +1748,9 @@ namespace OsmSharp.Routing.CH
                                         var current = new GeoCoordinate(
                                             coordinatesArray[idx].Latitude, coordinatesArray[idx].Longitude);
                                         line = new GeoCoordinateLine(previous, current, true, true);
-                                        if (closestWithoutMatchBox == null ||
-                                            closestWithoutMatchBox.IntersectsPotentially(previous, current))
-                                        { // potentially intersects.
+                                        //if (closestWithoutMatchBox == null ||
+                                        //    closestWithoutMatchBox.IntersectsPotentially(previous, current))
+                                        //{ // potentially intersects.
                                             distance = line.DistanceReal(coordinate).Value;
 
                                             if (distance < closestWithoutMatch.Distance)
@@ -1776,8 +1776,8 @@ namespace OsmSharp.Routing.CH
                                                     var position = distancePoint / distanceTotal;
 
                                                     var diff = coordinate - projectedPoint;
-                                                    closestWithoutMatchBox = new GeoCoordinateBox(new GeoCoordinate(coordinate + diff),
-                                                        new GeoCoordinate(coordinate - diff));
+                                                    //closestWithoutMatchBox = new GeoCoordinateBox(new GeoCoordinate(coordinate + diff),
+                                                    //    new GeoCoordinate(coordinate - diff));
                                                     closestWithoutMatch = new SearchClosestResult<CHEdgeData>(
                                                         distance, edges.Vertex1, edges.Vertex2, position, edges.EdgeData, coordinatesArray);
                                                 }
@@ -1814,7 +1814,7 @@ namespace OsmSharp.Routing.CH
                                                     }
                                                 }
                                             }
-                                        }
+                                        //}
 
                                         // add current segment distance to distanceToSegment for the next segment.
                                         distanceToSegment = distanceToSegment + line.LengthReal.Value;
@@ -1826,9 +1826,9 @@ namespace OsmSharp.Routing.CH
 
                                 // check the last segment.
                                 line = new GeoCoordinateLine(previous, toCoordinate, true, true);
-                                if (closestWithoutMatchBox == null ||
-                                    closestWithoutMatchBox.IntersectsPotentially(previous, toCoordinate))
-                                { // potentially intersects.
+                                //if (closestWithoutMatchBox == null ||
+                                //    closestWithoutMatchBox.IntersectsPotentially(previous, toCoordinate))
+                                //{ // potentially intersects.
                                     distance = line.DistanceReal(coordinate).Value;
 
                                     if (distance < closestWithoutMatch.Distance)
@@ -1854,8 +1854,8 @@ namespace OsmSharp.Routing.CH
                                             var position = distancePoint / distanceTotal;
 
                                             var diff = coordinate - projectedPoint;
-                                            closestWithoutMatchBox = new GeoCoordinateBox(new GeoCoordinate(coordinate + diff),
-                                                new GeoCoordinate(coordinate - diff));
+                                            //closestWithoutMatchBox = new GeoCoordinateBox(new GeoCoordinate(coordinate + diff),
+                                            //    new GeoCoordinate(coordinate - diff));
                                             closestWithoutMatch = new SearchClosestResult<CHEdgeData>(
                                                 distance, edges.Vertex1, edges.Vertex2, position, edges.EdgeData, coordinatesArray);
                                         }
@@ -1892,9 +1892,9 @@ namespace OsmSharp.Routing.CH
                                             }
                                         }
                                     }
-                                }
-                            }
-                        }
+                                //}
+                            //}
+                        //}
                     }
                 }
             }
@@ -1915,8 +1915,8 @@ namespace OsmSharp.Routing.CH
                             if (distance < closestWithoutMatch.Distance)
                             { // the distance found is closer.
                                 var diff = coordinate - vertexCoordinate;
-                                closestWithoutMatchBox = new GeoCoordinateBox(new GeoCoordinate(coordinate + diff),
-                                    new GeoCoordinate(coordinate - diff));
+                                //closestWithoutMatchBox = new GeoCoordinateBox(new GeoCoordinate(coordinate + diff),
+                                //    new GeoCoordinate(coordinate - diff));
                                 closestWithoutMatch = new SearchClosestResult<CHEdgeData>(
                                     distance, edges.Vertex1);
                             }
@@ -1926,8 +1926,8 @@ namespace OsmSharp.Routing.CH
                             if (distance < closestWithoutMatch.Distance)
                             { // the distance found is closer.
                                 var diff = coordinate - vertexCoordinate;
-                                closestWithoutMatchBox = new GeoCoordinateBox(new GeoCoordinate(coordinate + diff),
-                                    new GeoCoordinate(coordinate - diff));
+                                //closestWithoutMatchBox = new GeoCoordinateBox(new GeoCoordinate(coordinate + diff),
+                                //    new GeoCoordinate(coordinate - diff));
                                 closestWithoutMatch = new SearchClosestResult<CHEdgeData>(
                                     distance, edges.Vertex2);
                             }
@@ -1945,8 +1945,8 @@ namespace OsmSharp.Routing.CH
                                     if (distance < closestWithoutMatch.Distance)
                                     { // the distance found is closer.
                                         var diff = coordinate - vertexCoordinate;
-                                        closestWithoutMatchBox = new GeoCoordinateBox(new GeoCoordinate(coordinate + diff),
-                                            new GeoCoordinate(coordinate - diff));
+                                        //closestWithoutMatchBox = new GeoCoordinateBox(new GeoCoordinate(coordinate + diff),
+                                        //    new GeoCoordinate(coordinate - diff));
                                         closestWithoutMatch = new SearchClosestResult<CHEdgeData>(
                                             distance, edges.Vertex1, edges.Vertex2, idx, edges.EdgeData, arcValueValueCoordinatesArray);
                                     }
