@@ -317,5 +317,24 @@ namespace OsmSharp.Routing.Test.Osm
             profileTags.Clear();
             tags.Clear();
         }
+
+        /// <summary>
+        /// Tests normalization with steps and ramp.
+        /// </summary>
+        [Test]
+        public void TestRamp()
+        {
+            var tags = new TagsCollection();
+            var profileTags = new TagsCollection();
+            var metaTags = new TagsCollection();
+
+            tags.Add(Tag.Create("highway", "steps"));
+            tags.Add(Tag.Create("ramp", "yes"));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags));
+            Assert.IsTrue(profileTags.ContainsKeyValue("highway", "steps"));
+            Assert.IsTrue(profileTags.ContainsKeyValue("ramp", "yes"));
+            profileTags.Clear();
+            tags.Clear();
+        }
     }
 }

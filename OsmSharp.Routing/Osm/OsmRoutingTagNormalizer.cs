@@ -101,6 +101,7 @@ namespace OsmSharp.Routing.Osm
                     tags.NormalizeFoot(profileTags, metaTags, true);
                     tags.NormalizeBicycle(profileTags, metaTags, false);
                     tags.NormalizeMotorvehicle(profileTags, metaTags, false);
+                    tags.NormalizeRamp(profileTags, metaTags, false);
                     profileTags.Add("highway", highway);
                     break;
             }

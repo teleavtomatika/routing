@@ -830,5 +830,66 @@ namespace OsmSharp.Routing.Test.Osm.Streams
             }
             return uint.MaxValue;
         }
+
+        /// <summary>
+        /// Tests loading one way with highway=steps and ramp=yes.
+        /// </summary>
+        [Test]
+        public void TestRamp()
+        {
+            // build source stream.
+            var location1 = new GeoCoordinateSimple() { Latitude = 51.265016473294075f, Longitude = 4.7835588455200195f };
+            var location2 = new GeoCoordinateSimple() { Latitude = 51.265016473294075f, Longitude = 4.7907257080078125f };
+            var source = new OsmGeo[] {
+                Node.Create(1, location1.Latitude, location1.Longitude),
+                Node.Create(2, location2.Latitude, location2.Longitude),
+                Way.Create(1, new TagsCollection(
+                    Tag.Create("highway", "steps"),
+                    Tag.Create("ramp", "yes")), 1, 2)
+                }.ToOsmStreamSource();
+
+            // build db from stream.
+            var routerDb = new RouterDb();
+            var target = new RouterDbStreamTarget(
+                routerDb, new Vehicle[] {
+                    Vehicle.Bicycle
+                });
+            target.RegisterSource(source);
+            target.Initialize();
+            target.Pull();
+
+            // check result.
+            Assert.AreEqual(2, routerDb.Network.VertexCount);
+            Assert.AreEqual(1, routerDb.Network.EdgeCount);
+
+            var vertex1 = this.FindVertex(routerDb, 51.265016473294075f, 4.7835588455200195f);
+            Assert.AreNotEqual(uint.MaxValue, vertex1);
+            var vertex2 = this.FindVertex(routerDb, 51.265016473294075f, 4.7907257080078125f);
+            Assert.AreNotEqual(uint.MaxValue, vertex2);
+
+            // get edge-information.
+            var edges = routerDb.Network.GetEdgeEnumerator(vertex1);
+            var data = edges.First().Data;
+            var profile = routerDb.EdgeProfiles.Get(data.Profile);
+            var meta = routerDb.EdgeMeta.Get(data.MetaId);
+
+            Assert.AreEqual(GeoCoordinate.DistanceEstimateInMeter(location1, location2), data.Distance, 0.1);
+            Assert.IsTrue(profile.ContainsKeyValue("highway", "steps"));
+            Assert.IsTrue(profile.ContainsKeyValue("ramp", "yes"));
+            Assert.AreEqual(new TagsCollection(), meta);
+
+            // build db from stream.
+            routerDb = new RouterDb();
+            target = new RouterDbStreamTarget(
+                routerDb, new Vehicle[] {
+                    Vehicle.Car
+                });
+            target.RegisterSource(source);
+            target.Initialize();
+            target.Pull();
+
+            // check result.
+            Assert.AreEqual(0, routerDb.Network.VertexCount);
+        }
     }
 }
