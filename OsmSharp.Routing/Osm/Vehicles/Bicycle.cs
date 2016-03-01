@@ -143,10 +143,46 @@ namespace OsmSharp.Routing.Osm.Vehicles
         /// <summary>
         /// Returns true if the edge is one way forward, false if backward, null if bidirectional.
         /// </summary>
-        /// <param name="tags"></param>
-        /// <returns></returns>
         public override bool? IsOneWay(TagsCollectionBase tags)
         {
+            string oneway;
+            string highway;
+            if (tags.TryGetValue("oneway:bicycle", out oneway))
+            {
+                if (oneway == "yes")
+                {
+                    return true;
+                }
+                else if (oneway == "no")
+                {
+                    return null;
+                }
+                return false;
+            }
+
+            if (tags.TryGetValue("oneway", out oneway) &&
+                (tags.TryGetValue("highway", out highway) &&
+                 (highway == "cycleway")))
+            {
+                if (oneway == "yes")
+                {
+                    return true;
+                }
+                else if (oneway == "no")
+                {
+                    return null;
+                }
+                return false;
+            }
+
+            string junction;
+            if (tags.TryGetValue("junction", out junction))
+            {
+                if (junction == "roundabout")
+                {
+                    return true;
+                }
+            }
             return null;
         }
 

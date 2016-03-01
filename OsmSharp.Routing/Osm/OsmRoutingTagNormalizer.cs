@@ -49,7 +49,8 @@ namespace OsmSharp.Routing.Osm
             tags.NormalizeMaxspeed(profileTags, metaTags);
 
             // normalize oneway tags.
-            tags.NormalizeOneway(profileTags, metaTags);
+            tags.NormalizeOneway("oneway", profileTags, metaTags);
+            tags.NormalizeOneway("oneway:bicycle", profileTags, metaTags);
 
             // normalize junction=roundabout tag.
             tags.NormalizeJunction(profileTags, metaTags);
@@ -188,8 +189,7 @@ namespace OsmSharp.Routing.Osm
         /// <summary>
         /// Normalizes the oneway tag.
         /// </summary>
-        /// <returns></returns>
-        public static void NormalizeOneway(this TagsCollection tags, TagsCollection profileTags,
+        public static void NormalizeOneway(this TagsCollection tags, string key, TagsCollection profileTags,
             TagsCollection metaTags)
         {
             string oneway;
