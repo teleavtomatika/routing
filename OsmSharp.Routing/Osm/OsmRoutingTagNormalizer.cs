@@ -49,8 +49,8 @@ namespace OsmSharp.Routing.Osm
             tags.NormalizeMaxspeed(profileTags, metaTags);
 
             // normalize oneway tags.
-            tags.NormalizeOneway("oneway", profileTags, metaTags);
-            tags.NormalizeOneway("oneway:bicycle", profileTags, metaTags);
+            tags.NormalizeOneway(profileTags, metaTags);
+            tags.NormalizeOnewayBicycle(profileTags, metaTags);
 
             // normalize junction=roundabout tag.
             tags.NormalizeJunction(profileTags, metaTags);
@@ -189,7 +189,7 @@ namespace OsmSharp.Routing.Osm
         /// <summary>
         /// Normalizes the oneway tag.
         /// </summary>
-        public static void NormalizeOneway(this TagsCollection tags, string key, TagsCollection profileTags,
+        public static void NormalizeOneway(this TagsCollection tags, TagsCollection profileTags,
             TagsCollection metaTags)
         {
             string oneway;
@@ -210,6 +210,23 @@ namespace OsmSharp.Routing.Osm
             else
             {
                 profileTags.Add("oneway", "-1");
+            }
+        }
+
+        /// <summary>
+        /// Normalizes the oneway bicycle tag.
+        /// </summary>
+        public static void NormalizeOnewayBicycle(this TagsCollection tags, TagsCollection profileTags,
+            TagsCollection metaTags)
+        {
+            string oneway;
+            if (!tags.TryGetValue("oneway:bicycle", out oneway))
+            { // nothing to normalize.
+                return;
+            }
+            if (oneway == "no")
+            {
+                profileTags.Add("oneway:bicycle", "no");
             }
         }
 

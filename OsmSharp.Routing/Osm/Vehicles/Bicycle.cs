@@ -146,7 +146,6 @@ namespace OsmSharp.Routing.Osm.Vehicles
         public override bool? IsOneWay(TagsCollectionBase tags)
         {
             string oneway;
-            string highway;
             if (tags.TryGetValue("oneway:bicycle", out oneway))
             {
                 if (oneway == "yes")
@@ -160,9 +159,7 @@ namespace OsmSharp.Routing.Osm.Vehicles
                 return false;
             }
 
-            if (tags.TryGetValue("oneway", out oneway) &&
-                (tags.TryGetValue("highway", out highway) &&
-                 (highway == "cycleway")))
+            if (tags.TryGetValue("oneway", out oneway))
             {
                 if (oneway == "yes")
                 {
