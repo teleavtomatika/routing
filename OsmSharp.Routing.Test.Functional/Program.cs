@@ -16,15 +16,11 @@
 // You should have received a copy of the GNU General Public License
 // along with OsmSharp. If not, see <http://www.gnu.org/licenses/>.
 
-using OsmSharp.Geo.Features;
-using OsmSharp.Geo.Geometries;
-using OsmSharp.IO.Json.Linq;
-using OsmSharp.Routing.Osm.Vehicles;
-using OsmSharp.Routing.Test.Functional.Staging;
-using OsmSharp.Routing.Test.Functional.Tests;
-using System;
+using OsmSharp.Math.Geo;
+using OsmSharp.Osm.Streams;
+using OsmSharp.Routing.Algorithms.Search;
+using OsmSharp.Routing.Osm;
 using System.IO;
-using System.Reflection;
 
 namespace OsmSharp.Routing.Test.Functional
 {
@@ -36,70 +32,27 @@ namespace OsmSharp.Routing.Test.Functional
             OsmSharp.Logging.Log.Enable();
             OsmSharp.Logging.Log.RegisterListener(new ConsoleTraceListener());
 
-            OsmSharp.Routing.Osm.Vehicles.Vehicle.RegisterVehicles();
+            // create and register railway vehicle.
+            var railwayVehicle = new RailwayVehicle();
+            railwayVehicle.Register();
 
-            // download and extract test-data.
-            Console.WriteLine("Downloading Belgium...");
-            Download.DownloadBelgiumAll();
+            // create router db.
+            var routerDb = new RouterDb();
 
-            //// test building a router db.
-            //Console.WriteLine("Tests building a router db...");
-            //var routerDb = Runner.TestBuildRouterDb("belgium-latest.osm.pbf", Vehicle.Car);
-            //routerDb.AddContracted(Vehicle.Car.Fastest());
-            var routerDb = RouterDb.Deserialize(
-                File.OpenRead(@"D:\work\data\routing\planet\europe\belgium.c.cf.routing"));
+            // load the data.
+            var target = new OsmSharp.Routing.Osm.Streams.RouterDbStreamTarget(routerDb, new Osm.Vehicles.Vehicle[] { railwayVehicle },
+                normalizeTags: false); // IMPORTANT: disable tags normalization.
+            target.RegisterSource(new OsmSharp.Osm.Xml.Streams.XmlOsmStreamSource(File.OpenRead("onetrack.osm")), false); // IMPORTANT: disable non-routing tags filter.
+            target.Pull();
+
+            // sort the network.
+            routerDb.Network.Sort();
+
+            // calculate route.
             var router = new Router(routerDb);
-
-            // test resolving.
-            var embeddedResourceId = "OsmSharp.Routing.Test.Functional.Tests.Belgium.resolve1.geojson";
-
-            FeatureCollection featureCollection;
-            using (var stream = new StreamReader(Assembly.GetExecutingAssembly().GetManifestResourceStream(embeddedResourceId)))
-            {
-                featureCollection = OsmSharp.Geo.Streams.GeoJson.GeoJsonConverter.ToFeatureCollection(stream.ReadToEnd());
-            }
-
-            //var performanceInfoConsumer = new PerformanceInfoConsumer(embeddedResourceId);
-            //performanceInfoConsumer.Start();
-
-            //for (var i = 0; i < 10000; i++)
-            //{
-            //    Tests.Runner.TestResolve(router, featureCollection,
-            //        Tests.Runner.Default);
-            //}
-            //performanceInfoConsumer.Stop();
-
-            var performanceInfoConsumer = new PerformanceInfoConsumer("Routing");
-            performanceInfoConsumer.Start();
-
-            for (var i = 0; i < 10; i++)
-            {
-                foreach(var source in featureCollection)
-                {
-                    var sourcePoint = router.TryResolve(Vehicle.Car.Fastest(), 
-                        (source.Geometry as Point).Coordinate);
-                    if(sourcePoint.IsError)
-                    {
-                        continue;
-                    }
-                    foreach (var target in featureCollection)
-                    {
-                        var targetPoint = router.TryResolve(Vehicle.Car.Fastest(),
-                            (target.Geometry as Point).Coordinate);
-                        if (targetPoint.IsError)
-                        {
-                            continue;
-                        }
-                        
-                        var route = router.Calculate(Vehicle.Car.Fastest(),
-                            sourcePoint.Value, targetPoint.Value);
-                    }
-                }
-            }
-
-            performanceInfoConsumer.Stop();
-
-            Console.ReadLine();
+            var route = router.Calculate(railwayVehicle.Fastest(),
+                new GeoCoordinate(51.04914774002, 3.64630507464),
+                new GeoCoordinate(51.04798323263, 3.65157616572));
         }
     }
 }

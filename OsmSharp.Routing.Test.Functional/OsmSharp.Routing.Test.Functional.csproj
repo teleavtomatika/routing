@@ -77,11 +77,15 @@
     <Compile Include="PerformanceInfoConsumer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RailwayVehicle.cs" />
     <Compile Include="Staging\Download.cs" />
     <Compile Include="Tests\Runner.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="onetrack.osm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
     <EmbeddedResource Include="Tests\Belgium\resolve1.geojson" />
   </ItemGroup>
