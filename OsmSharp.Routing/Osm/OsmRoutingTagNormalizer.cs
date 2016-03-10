@@ -17,6 +17,7 @@
 // along with OsmSharp. If not, see <http://www.gnu.org/licenses/>.
 
 using OsmSharp.Collections.Tags;
+using OsmSharp.Routing.Osm.Vehicles;
 using System.Collections.Generic;
 
 namespace OsmSharp.Routing.Osm
@@ -29,7 +30,6 @@ namespace OsmSharp.Routing.Osm
         /// <summary>
         /// Splits the given tags into a normalized version, profile tags, and the rest in metatags.
         /// </summary>
-        /// <returns></returns>
         public static bool Normalize(this TagsCollection tags, TagsCollection profileTags, 
             TagsCollection metaTags)
         {
@@ -40,10 +40,7 @@ namespace OsmSharp.Routing.Osm
             }
 
             // normalize access tags.
-            if(!tags.NormalizeAccess(profileTags, metaTags))
-            { // access is denied, don't use this way.
-                return false;
-            }
+            var defaultAccess = tags.NormalizeAccess(profileTags, metaTags);
 
             // normalize maxspeed tags.
             tags.NormalizeMaxspeed(profileTags, metaTags);
@@ -63,9 +60,9 @@ namespace OsmSharp.Routing.Osm
                 case "trunk_link":
                 case "primary":
                 case "primary_link":
-                    tags.NormalizeFoot(profileTags, metaTags, false);
-                    tags.NormalizeBicycle(profileTags, metaTags, false);
-                    tags.NormalizeMotorvehicle(profileTags, metaTags, true);
+                    tags.NormalizeFoot(profileTags, metaTags, defaultAccess);
+                    tags.NormalizeBicycle(profileTags, metaTags, defaultAccess);
+                    tags.NormalizeMotorvehicle(profileTags, metaTags, defaultAccess);
                     profileTags.Add("highway", highway);
                     break;
                 case "secondary":
@@ -79,29 +76,29 @@ namespace OsmSharp.Routing.Osm
                 case "services":
                 case "living_street":
                 case "track":
-                    tags.NormalizeFoot(profileTags, metaTags, true);
-                    tags.NormalizeBicycle(profileTags, metaTags, true);
-                    tags.NormalizeMotorvehicle(profileTags, metaTags, true);
+                    tags.NormalizeFoot(profileTags, metaTags, defaultAccess);
+                    tags.NormalizeBicycle(profileTags, metaTags, defaultAccess);
+                    tags.NormalizeMotorvehicle(profileTags, metaTags, defaultAccess);
                     profileTags.Add("highway", highway);
                     break;
                 case "cycleway":
-                    tags.NormalizeFoot(profileTags, metaTags, false);
-                    tags.NormalizeBicycle(profileTags, metaTags, true);
-                    tags.NormalizeMotorvehicle(profileTags, metaTags, false);
+                    tags.NormalizeFoot(profileTags, metaTags, defaultAccess);
+                    tags.NormalizeBicycle(profileTags, metaTags, defaultAccess);
+                    tags.NormalizeMotorvehicle(profileTags, metaTags, defaultAccess);
                     profileTags.Add("highway", highway);
                     break;
                 case "path":
-                    tags.NormalizeFoot(profileTags, metaTags, true);
-                    tags.NormalizeBicycle(profileTags, metaTags, true);
-                    tags.NormalizeMotorvehicle(profileTags, metaTags, false);
+                    tags.NormalizeFoot(profileTags, metaTags, defaultAccess);
+                    tags.NormalizeBicycle(profileTags, metaTags, defaultAccess);
+                    tags.NormalizeMotorvehicle(profileTags, metaTags, defaultAccess);
                     profileTags.Add("highway", highway);
                     break;
                 case "pedestrian":
                 case "footway":
                 case "steps":
-                    tags.NormalizeFoot(profileTags, metaTags, true);
-                    tags.NormalizeBicycle(profileTags, metaTags, false);
-                    tags.NormalizeMotorvehicle(profileTags, metaTags, false);
+                    tags.NormalizeFoot(profileTags, metaTags, defaultAccess);
+                    tags.NormalizeBicycle(profileTags, metaTags, defaultAccess);
+                    tags.NormalizeMotorvehicle(profileTags, metaTags, defaultAccess);
                     tags.NormalizeRamp(profileTags, metaTags, false);
                     profileTags.Add("highway", highway);
                     break;
@@ -161,6 +158,14 @@ namespace OsmSharp.Routing.Osm
             { // access needs to be descided on a vehicle by vehicle basis.
                 profileTags.Add("access", access);
                 return true;
+            }
+            if (defaultAccessFound.Value)
+            {
+                profileTags.Add("access", "yes");
+            }
+            else
+            {
+                profileTags.Add("access", "no");
             }
             return defaultAccessFound.Value;
         }
@@ -351,24 +356,25 @@ namespace OsmSharp.Routing.Osm
         /// <summary>
         /// Normalizes the bicycle tag.
         /// </summary>
-        public static void NormalizeBicycle(this TagsCollection tags, TagsCollection profileTags,
+        public static bool? NormalizeBicycle(this TagsCollection tags, TagsCollection profileTags,
             TagsCollection metaTags, bool defaultAccess)
         {
             string bicycle;
             if(!tags.TryGetValue("bicycle", out bicycle))
             { // nothing to normalize.
-                return;
+                return null;
             }
             bool? defaultAccessFound;
             if(!BicycleValues.TryGetValue(bicycle, out defaultAccessFound))
             { // invalid value.
-                return;
+                return null;
             }
 
             if (defaultAccess != defaultAccessFound)
             {
                 profileTags.Add("bicycle", bicycle);
             }
+            return defaultAccessFound;
         }
 
         private static Dictionary<string, bool?> _rampValues = null;

@@ -54,17 +54,11 @@ namespace OsmSharp.Routing.Osm.Vehicles
         /// <summary>
         /// Returns true if the vehicle is allowed on the way represented by these tags
         /// </summary>
-        /// <param name="tags"></param>
-        /// <param name="highwayType"></param>
-        /// <returns></returns>
         protected override bool IsVehicleAllowed(TagsCollectionBase tags, string highwayType)
         {
-            if (tags.ContainsKey("motor_vehicle"))
+            if (!tags.InterpretAccessValues(VehicleTypes, "access"))
             {
-                if (tags["motor_vehicle"] == "no")
-                {
-                    return false;
-                }
+                return false;
             }
             return AccessibleTags.ContainsKey(highwayType);
         }

@@ -95,5 +95,68 @@ namespace OsmSharp.Routing.Test.Osm
                 new GeoCoordinate(51.04963322083945, 3.719692826271057));
             Assert.IsFalse(route.IsError);
         }
+
+        /// <summary>
+        /// An integration test that loads one way with access=no and bicycle=yes.
+        /// </summary>
+        [Test]
+        public void TestBicycleYesAccessNo()
+        {
+            // the input osm-data.
+            var osmGeos = new OsmGeo[]
+            {
+                new Node()
+                {
+                    Id = 1,
+                    Latitude = 51.04963322083945,
+                    Longitude = 3.719692826271057
+                },
+                new Node()
+                {
+                    Id = 2,
+                    Latitude = 51.05062804602733,
+                    Longitude = 3.7198376655578613
+                },
+                new Way()
+                {
+                    Id = 1,
+                    Nodes = new List<long>(new long[]
+                    {
+                        1, 2
+                    }),
+                    Tags = new TagsCollection(
+                        Tag.Create("highway", "residential"),
+                        Tag.Create("access", "no"),
+                        Tag.Create("bicycle", "yes"))
+                }
+            }.ToOsmStreamSource();
+
+            // build router db.
+            var routerDb = new RouterDb();
+            routerDb.LoadOsmData(osmGeos, Vehicle.Car, Vehicle.Bicycle);
+
+            // test some routes.
+            var router = new Router(routerDb);
+
+            // confirm access=no is working for cars.
+            var route = router.TryCalculate(Vehicle.Car.Fastest(),
+                new GeoCoordinate(51.04963322083945, 3.719692826271057),
+                new GeoCoordinate(51.05062804602733, 3.7198376655578613));
+            Assert.IsTrue(route.IsError);
+            route = router.TryCalculate(Vehicle.Car.Fastest(),
+                new GeoCoordinate(51.05062804602733, 3.7198376655578613),
+                new GeoCoordinate(51.04963322083945, 3.719692826271057));
+            Assert.IsTrue(route.IsError);
+
+            // confirm access=no combined with bicycle=yes is working for bicycles.
+            route = router.TryCalculate(Vehicle.Bicycle.Fastest(),
+                new GeoCoordinate(51.04963322083945, 3.719692826271057),
+                new GeoCoordinate(51.05062804602733, 3.7198376655578613));
+            Assert.IsFalse(route.IsError);
+            route = router.TryCalculate(Vehicle.Bicycle.Fastest(),
+                new GeoCoordinate(51.05062804602733, 3.7198376655578613),
+                new GeoCoordinate(51.04963322083945, 3.719692826271057));
+            Assert.IsFalse(route.IsError);
+        }
     }
 }

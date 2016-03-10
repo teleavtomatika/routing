@@ -97,7 +97,7 @@ namespace OsmSharp.Routing.Test.Osm
             tags.Add(Tag.Create("bicycle", "no"));
             Assert.IsTrue(tags.Normalize(profileTags, metaTags));
             Assert.IsTrue(profileTags.ContainsKeyValue("highway", "footway"));
-            Assert.IsFalse(profileTags.ContainsKeyValue("bicycle", "no"));
+            Assert.IsTrue(profileTags.ContainsKeyValue("bicycle", "no"));
             profileTags.Clear();
             tags.Clear();
         }
@@ -140,7 +140,7 @@ namespace OsmSharp.Routing.Test.Osm
             tags.Add(Tag.Create("foot", "no"));
             Assert.IsTrue(tags.Normalize(profileTags, metaTags));
             Assert.IsTrue(profileTags.ContainsKeyValue("highway", "cycleway"));
-            Assert.IsFalse(profileTags.ContainsKeyValue("foot", "no"));
+            Assert.IsTrue(profileTags.ContainsKeyValue("foot", "no"));
             profileTags.Clear();
             tags.Clear();
         }
@@ -183,7 +183,7 @@ namespace OsmSharp.Routing.Test.Osm
             tags.Add(Tag.Create("motorvehicle", "no"));
             Assert.IsTrue(tags.Normalize(profileTags, metaTags));
             Assert.IsTrue(profileTags.ContainsKeyValue("highway", "cycleway"));
-            Assert.IsFalse(profileTags.ContainsKeyValue("motorvehicle", "no"));
+            Assert.IsTrue(profileTags.ContainsKeyValue("motorvehicle", "no"));
             profileTags.Clear();
             tags.Clear();
         }
@@ -234,16 +234,10 @@ namespace OsmSharp.Routing.Test.Osm
             var metaTags = new TagsCollection();
 
             tags.Add(Tag.Create("highway", "residential"));
-            tags.Add(Tag.Create("access", "no"));
-            Assert.IsFalse(tags.Normalize(profileTags, metaTags));
-            profileTags.Clear();
-            tags.Clear();
-
-            tags.Add(Tag.Create("highway", "residential"));
             tags.Add(Tag.Create("access", "yes"));
             Assert.IsTrue(tags.Normalize(profileTags, metaTags));
             Assert.IsTrue(profileTags.ContainsKeyValue("highway", "residential"));
-            Assert.IsFalse(profileTags.ContainsKeyValue("access", "yes"));
+            Assert.IsTrue(profileTags.ContainsKeyValue("access", "yes"));
             profileTags.Clear();
             tags.Clear();
 
