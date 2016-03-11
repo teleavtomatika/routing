@@ -146,13 +146,17 @@ namespace OsmSharp.Routing
         public static void AddContracted(this RouterDb db, Profiles.Profile profile)
         {
             // create the raw directed graph.
-            var contracted = new DirectedMetaGraph(ContractedEdgeDataSerializer.Size, ContractedEdgeDataSerializer.MetaSize);
-            var directedGraphBuilder = new DirectedGraphBuilder(db.Network.GeometricGraph.Graph, contracted, (p) =>
-                {
-                    var tags = db.EdgeProfiles.Get(p);
-                    return profile.Factor(tags);
-                });
-            directedGraphBuilder.Run();
+            DirectedMetaGraph contracted = null;
+            lock (db)
+            {
+                contracted = new DirectedMetaGraph(ContractedEdgeDataSerializer.Size, ContractedEdgeDataSerializer.MetaSize);
+                var directedGraphBuilder = new DirectedGraphBuilder(db.Network.GeometricGraph.Graph, contracted, (p) =>
+                    {
+                        var tags = db.EdgeProfiles.Get(p);
+                        return profile.Factor(tags);
+                    });
+                directedGraphBuilder.Run();
+            }
 
             // contract the graph.
             var priorityCalculator = new EdgeDifferencePriorityCalculator(contracted,
@@ -165,7 +169,10 @@ namespace OsmSharp.Routing
             hierarchyBuilder.Run();
 
             // add the graph.
-            db.AddContracted(profile, contracted);
+            lock (db)
+            {
+                db.AddContracted(profile, contracted);
+            }
         }
 
         /// <summary>
