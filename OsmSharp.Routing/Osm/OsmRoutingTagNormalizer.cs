@@ -60,8 +60,8 @@ namespace OsmSharp.Routing.Osm
                 case "trunk_link":
                 case "primary":
                 case "primary_link":
-                    tags.NormalizeFoot(profileTags, metaTags, defaultAccess);
-                    tags.NormalizeBicycle(profileTags, metaTags, defaultAccess);
+                    tags.NormalizeFoot(profileTags, metaTags, false);
+                    tags.NormalizeBicycle(profileTags, metaTags, false);
                     tags.NormalizeMotorvehicle(profileTags, metaTags, defaultAccess);
                     profileTags.Add("highway", highway);
                     break;
@@ -84,21 +84,21 @@ namespace OsmSharp.Routing.Osm
                 case "cycleway":
                     tags.NormalizeFoot(profileTags, metaTags, defaultAccess);
                     tags.NormalizeBicycle(profileTags, metaTags, defaultAccess);
-                    tags.NormalizeMotorvehicle(profileTags, metaTags, defaultAccess);
+                    tags.NormalizeMotorvehicle(profileTags, metaTags, false);
                     profileTags.Add("highway", highway);
                     break;
                 case "path":
                     tags.NormalizeFoot(profileTags, metaTags, defaultAccess);
                     tags.NormalizeBicycle(profileTags, metaTags, defaultAccess);
-                    tags.NormalizeMotorvehicle(profileTags, metaTags, defaultAccess);
+                    tags.NormalizeMotorvehicle(profileTags, metaTags, false);
                     profileTags.Add("highway", highway);
                     break;
                 case "pedestrian":
                 case "footway":
                 case "steps":
                     tags.NormalizeFoot(profileTags, metaTags, defaultAccess);
-                    tags.NormalizeBicycle(profileTags, metaTags, defaultAccess);
-                    tags.NormalizeMotorvehicle(profileTags, metaTags, defaultAccess);
+                    tags.NormalizeBicycle(profileTags, metaTags, false);
+                    tags.NormalizeMotorvehicle(profileTags, metaTags, false);
                     tags.NormalizeRamp(profileTags, metaTags, false);
                     profileTags.Add("highway", highway);
                     break;

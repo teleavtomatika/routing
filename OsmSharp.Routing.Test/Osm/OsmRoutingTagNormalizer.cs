@@ -97,7 +97,7 @@ namespace OsmSharp.Routing.Test.Osm
             tags.Add(Tag.Create("bicycle", "no"));
             Assert.IsTrue(tags.Normalize(profileTags, metaTags));
             Assert.IsTrue(profileTags.ContainsKeyValue("highway", "footway"));
-            Assert.IsTrue(profileTags.ContainsKeyValue("bicycle", "no"));
+            Assert.IsFalse(profileTags.ContainsKeyValue("bicycle", "no"));
             profileTags.Clear();
             tags.Clear();
         }
@@ -183,7 +183,7 @@ namespace OsmSharp.Routing.Test.Osm
             tags.Add(Tag.Create("motorvehicle", "no"));
             Assert.IsTrue(tags.Normalize(profileTags, metaTags));
             Assert.IsTrue(profileTags.ContainsKeyValue("highway", "cycleway"));
-            Assert.IsTrue(profileTags.ContainsKeyValue("motorvehicle", "no"));
+            Assert.IsFalse(profileTags.ContainsKeyValue("motorvehicle", "no"));
             profileTags.Clear();
             tags.Clear();
         }

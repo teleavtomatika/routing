@@ -212,6 +212,109 @@ namespace OsmSharp.Routing.Test.Osm
         }
 
         /// <summary>
+        /// An integration test that loads one way with highway=pedestrian.
+        /// </summary>
+        [Test]
+        public void TestBicycleHighwayPedestrian()
+        {
+            // the input osm-data.
+            var osmGeos = new OsmGeo[]
+            {
+                new Node()
+                {
+                    Id = 1,
+                    Latitude = 51.04963322083945,
+                    Longitude = 3.719692826271057
+                },
+                new Node()
+                {
+                    Id = 2,
+                    Latitude = 51.05062804602733,
+                    Longitude = 3.7198376655578613
+                },
+                new Way()
+                {
+                    Id = 1,
+                    Nodes = new List<long>(new long[]
+                    {
+                        1, 2
+                    }),
+                    Tags = new TagsCollection(
+                        Tag.Create("highway", "pedestrian"))
+                }
+            }.ToOsmStreamSource();
+
+            // build router db.
+            var routerDb = new RouterDb();
+            routerDb.LoadOsmData(osmGeos, Vehicle.Bicycle);
+
+            // test some routes.
+            var router = new Router(routerDb);
+
+            // confirm it's not working for bicycles.
+            var route = router.TryCalculate(Vehicle.Bicycle.Fastest(),
+                new GeoCoordinate(51.04963322083945, 3.719692826271057),
+                new GeoCoordinate(51.05062804602733, 3.7198376655578613));
+            Assert.IsTrue(route.IsError);
+            route = router.TryCalculate(Vehicle.Bicycle.Fastest(),
+                new GeoCoordinate(51.05062804602733, 3.7198376655578613),
+                new GeoCoordinate(51.04963322083945, 3.719692826271057));
+            Assert.IsTrue(route.IsError);
+        }
+
+        /// <summary>
+        /// An integration test that loads one way with highway=pedestrian and bicycle=yes.
+        /// </summary>
+        [Test]
+        public void TestBicycleHighwayPedestrianBicycleYes()
+        {
+            // the input osm-data.
+            var osmGeos = new OsmGeo[]
+            {
+                new Node()
+                {
+                    Id = 1,
+                    Latitude = 51.04963322083945,
+                    Longitude = 3.719692826271057
+                },
+                new Node()
+                {
+                    Id = 2,
+                    Latitude = 51.05062804602733,
+                    Longitude = 3.7198376655578613
+                },
+                new Way()
+                {
+                    Id = 1,
+                    Nodes = new List<long>(new long[]
+                    {
+                        1, 2
+                    }),
+                    Tags = new TagsCollection(
+                        Tag.Create("highway", "pedestrian"),
+                        Tag.Create("bicycle", "yes"))
+                }
+            }.ToOsmStreamSource();
+
+            // build router db.
+            var routerDb = new RouterDb();
+            routerDb.LoadOsmData(osmGeos, Vehicle.Bicycle);
+
+            // test some routes.
+            var router = new Router(routerDb);
+
+            // confirm it's working for bicycles.
+            var route = router.TryCalculate(Vehicle.Bicycle.Fastest(),
+                new GeoCoordinate(51.04963322083945, 3.719692826271057),
+                new GeoCoordinate(51.05062804602733, 3.7198376655578613));
+            Assert.IsFalse(route.IsError);
+            route = router.TryCalculate(Vehicle.Bicycle.Fastest(),
+                new GeoCoordinate(51.05062804602733, 3.7198376655578613),
+                new GeoCoordinate(51.04963322083945, 3.719692826271057));
+            Assert.IsFalse(route.IsError);
+        }
+
+        /// <summary>
         /// An integration test that loads two overlapping ways, highway=pedestrian, and highway=residential
         /// </summary>
         [Test]
