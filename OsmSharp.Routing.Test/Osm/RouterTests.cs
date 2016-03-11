@@ -158,5 +158,271 @@ namespace OsmSharp.Routing.Test.Osm
                 new GeoCoordinate(51.04963322083945, 3.719692826271057));
             Assert.IsFalse(route.IsError);
         }
+
+        /// <summary>
+        /// An integration test that loads one way with bicycle=no.
+        /// </summary>
+        [Test]
+        public void TestBicycleNo()
+        {
+            // the input osm-data.
+            var osmGeos = new OsmGeo[]
+            {
+                new Node()
+                {
+                    Id = 1,
+                    Latitude = 51.04963322083945,
+                    Longitude = 3.719692826271057
+                },
+                new Node()
+                {
+                    Id = 2,
+                    Latitude = 51.05062804602733,
+                    Longitude = 3.7198376655578613
+                },
+                new Way()
+                {
+                    Id = 1,
+                    Nodes = new List<long>(new long[]
+                    {
+                        1, 2
+                    }),
+                    Tags = new TagsCollection(
+                        Tag.Create("highway", "residential"),
+                        Tag.Create("bicycle", "no"))
+                }
+            }.ToOsmStreamSource();
+
+            // build router db.
+            var routerDb = new RouterDb();
+            routerDb.LoadOsmData(osmGeos, Vehicle.Car, Vehicle.Bicycle, Vehicle.Pedestrian);
+
+            // test some routes.
+            var router = new Router(routerDb);
+
+            // confirm it's not working for bicycles.
+            var route = router.TryCalculate(Vehicle.Bicycle.Fastest(),
+                new GeoCoordinate(51.04963322083945, 3.719692826271057),
+                new GeoCoordinate(51.05062804602733, 3.7198376655578613));
+            Assert.IsTrue(route.IsError);
+            route = router.TryCalculate(Vehicle.Bicycle.Fastest(),
+                new GeoCoordinate(51.05062804602733, 3.7198376655578613),
+                new GeoCoordinate(51.04963322083945, 3.719692826271057));
+            Assert.IsTrue(route.IsError);
+        }
+
+        /// <summary>
+        /// An integration test that loads two overlapping ways, highway=pedestrian, and highway=residential
+        /// </summary>
+        [Test]
+        public void TestOverlappingWaysPedestrianResidential()
+        {
+            // the input osm-data.
+            var osmGeos = new OsmGeo[]
+            {
+                new Node()
+                {
+                    Id = 1,
+                    Latitude = 51.04963322083945,
+                    Longitude = 3.719692826271057
+                },
+                new Node()
+                {
+                    Id = 2,
+                    Latitude = 51.05062804602733,
+                    Longitude = 3.7198376655578613
+                },
+                new Way()
+                {
+                    Id = 2,
+                    Nodes = new List<long>(new long[]
+                    {
+                        1, 2
+                    }),
+                    Tags = new TagsCollection(
+                        Tag.Create("highway", "pedestrian"))
+                },
+                new Way()
+                {
+                    Id = 1,
+                    Nodes = new List<long>(new long[]
+                    {
+                        1, 2
+                    }),
+                    Tags = new TagsCollection(
+                        Tag.Create("highway", "residential"))
+                }
+            }.ToOsmStreamSource();
+
+            // build router db.
+            var routerDb = new RouterDb();
+            routerDb.LoadOsmData(osmGeos, Vehicle.Car, Vehicle.Bicycle, Vehicle.Pedestrian);
+
+            // test some routes.
+            var router = new Router(routerDb);
+
+            // confirm it's working for cars.
+            var route = router.TryCalculate(Vehicle.Car.Fastest(),
+                new GeoCoordinate(51.04963322083945, 3.719692826271057),
+                new GeoCoordinate(51.05062804602733, 3.7198376655578613));
+            Assert.IsFalse(route.IsError);
+            route = router.TryCalculate(Vehicle.Car.Fastest(),
+                new GeoCoordinate(51.05062804602733, 3.7198376655578613),
+                new GeoCoordinate(51.04963322083945, 3.719692826271057));
+            Assert.IsFalse(route.IsError);
+
+            // confirm it's working for pedestrians.
+            route = router.TryCalculate(Vehicle.Bicycle.Fastest(),
+                new GeoCoordinate(51.04963322083945, 3.719692826271057),
+                new GeoCoordinate(51.05062804602733, 3.7198376655578613));
+            Assert.IsFalse(route.IsError);
+            route = router.TryCalculate(Vehicle.Bicycle.Fastest(),
+                new GeoCoordinate(51.05062804602733, 3.7198376655578613),
+                new GeoCoordinate(51.04963322083945, 3.719692826271057));
+            Assert.IsFalse(route.IsError);
+        }
+
+        /// <summary>
+        /// An integration test that loads two overlapping ways, highway=pedestrian, and highway=residential
+        /// </summary>
+        [Test]
+        public void TestOverlappingWaysResidentialPedestrian()
+        {
+            // the input osm-data.
+            var osmGeos = new OsmGeo[]
+            {
+                new Node()
+                {
+                    Id = 1,
+                    Latitude = 51.04963322083945,
+                    Longitude = 3.719692826271057
+                },
+                new Node()
+                {
+                    Id = 2,
+                    Latitude = 51.05062804602733,
+                    Longitude = 3.7198376655578613
+                },
+                new Way()
+                {
+                    Id = 1,
+                    Nodes = new List<long>(new long[]
+                    {
+                        1, 2
+                    }),
+                    Tags = new TagsCollection(
+                        Tag.Create("highway", "residential"))
+                },
+                new Way()
+                {
+                    Id = 2,
+                    Nodes = new List<long>(new long[]
+                    {
+                        1, 2
+                    }),
+                    Tags = new TagsCollection(
+                        Tag.Create("highway", "pedestrian"))
+                }
+            }.ToOsmStreamSource();
+
+            // build router db.
+            var routerDb = new RouterDb();
+            routerDb.LoadOsmData(osmGeos, Vehicle.Car, Vehicle.Bicycle, Vehicle.Pedestrian);
+
+            // test some routes.
+            var router = new Router(routerDb);
+
+            // confirm it's working for cars.
+            var route = router.TryCalculate(Vehicle.Car.Fastest(),
+                new GeoCoordinate(51.04963322083945, 3.719692826271057),
+                new GeoCoordinate(51.05062804602733, 3.7198376655578613));
+            Assert.IsFalse(route.IsError);
+            route = router.TryCalculate(Vehicle.Car.Fastest(),
+                new GeoCoordinate(51.05062804602733, 3.7198376655578613),
+                new GeoCoordinate(51.04963322083945, 3.719692826271057));
+            Assert.IsFalse(route.IsError);
+
+            // confirm it's working for pedestrians.
+            route = router.TryCalculate(Vehicle.Bicycle.Fastest(),
+                new GeoCoordinate(51.04963322083945, 3.719692826271057),
+                new GeoCoordinate(51.05062804602733, 3.7198376655578613));
+            Assert.IsFalse(route.IsError);
+            route = router.TryCalculate(Vehicle.Bicycle.Fastest(),
+                new GeoCoordinate(51.05062804602733, 3.7198376655578613),
+                new GeoCoordinate(51.04963322083945, 3.719692826271057));
+            Assert.IsFalse(route.IsError);
+        }
+
+        /// <summary>
+        /// An integration test that loads two overlapping ways, highway=cycleway, and highway=residential,bicycle=no
+        /// </summary>
+        [Test]
+        public void TestOverlappingWaysResidentialCycleway()
+        {
+            // the input osm-data.
+            var osmGeos = new OsmGeo[]
+            {
+                new Node()
+                {
+                    Id = 1,
+                    Latitude = 51.04963322083945,
+                    Longitude = 3.719692826271057
+                },
+                new Node()
+                {
+                    Id = 2,
+                    Latitude = 51.05062804602733,
+                    Longitude = 3.7198376655578613
+                },
+                new Way()
+                {
+                    Id = 1,
+                    Nodes = new List<long>(new long[]
+                    {
+                        1, 2
+                    }),
+                    Tags = new TagsCollection(
+                        Tag.Create("highway", "residential"),
+                        Tag.Create("bicycle", "no"))
+                },
+                new Way()
+                {
+                    Id = 2,
+                    Nodes = new List<long>(new long[]
+                    {
+                        1, 2
+                    }),
+                    Tags = new TagsCollection(
+                        Tag.Create("highway", "cycleway"))
+                }
+            }.ToOsmStreamSource();
+
+            // build router db.
+            var routerDb = new RouterDb();
+            routerDb.LoadOsmData(osmGeos, Vehicle.Car, Vehicle.Bicycle, Vehicle.Pedestrian);
+
+            // test some routes.
+            var router = new Router(routerDb);
+
+            // confirm it's working for cars.
+            var route = router.TryCalculate(Vehicle.Car.Fastest(),
+                new GeoCoordinate(51.04963322083945, 3.719692826271057),
+                new GeoCoordinate(51.05062804602733, 3.7198376655578613));
+            Assert.IsFalse(route.IsError);
+            route = router.TryCalculate(Vehicle.Car.Fastest(),
+                new GeoCoordinate(51.05062804602733, 3.7198376655578613),
+                new GeoCoordinate(51.04963322083945, 3.719692826271057));
+            Assert.IsFalse(route.IsError);
+
+            // confirm it's working for bicycle.
+            route = router.TryCalculate(Vehicle.Bicycle.Fastest(),
+                new GeoCoordinate(51.04963322083945, 3.719692826271057),
+                new GeoCoordinate(51.05062804602733, 3.7198376655578613));
+            Assert.IsFalse(route.IsError);
+            route = router.TryCalculate(Vehicle.Bicycle.Fastest(),
+                new GeoCoordinate(51.05062804602733, 3.7198376655578613),
+                new GeoCoordinate(51.04963322083945, 3.719692826271057));
+            Assert.IsFalse(route.IsError);
+        }
     }
 }

@@ -97,6 +97,14 @@ namespace OsmSharp.Routing.Osm.Streams
         }
 
         /// <summary>
+        /// Tries to get the first vertex that was added for this node.
+        /// </summary>
+        public bool TryGetFirst(long nodeId, out uint vertex)
+        {
+            return _firstMap.TryGetValue(nodeId, out vertex);
+        }
+
+        /// <summary>
         /// Calculates the maximum vertices per node in this map.
         /// </summary>
         /// <returns></returns>
