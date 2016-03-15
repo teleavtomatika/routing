@@ -103,6 +103,7 @@ namespace OsmSharp.Routing.Osm.Vehicles
                 _accessValues.Add("public", true);
                 _accessValues.Add("discouraged", null);
                 _accessValues.Add("delivery", true);
+                _accessValues.Add("use_sidepath", false);
             }
             return _accessValues;
         }

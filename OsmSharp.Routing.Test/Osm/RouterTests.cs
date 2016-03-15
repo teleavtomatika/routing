@@ -746,5 +746,87 @@ namespace OsmSharp.Routing.Test.Osm
                 new GeoCoordinate(51.04963322083945, 3.719692826271057));
             Assert.IsTrue(route.IsError);
         }
+
+        /// <summary>
+        /// An integration test to test handling the bicycle=use_sidepath tag. Expected is that this tag leads to the sidepath being used.
+        /// </summary>
+        [Test]
+        public void TestBicycleUseSidepath()
+        {
+            // the input osm-data.
+            var osmGeos = new OsmGeo[]
+            {
+                new Node()
+                {
+                    Id = 1,
+                    Latitude = 12.608657753733688,
+                    Longitude = -7.966136634349823
+                },
+                new Node()
+                {
+                    Id = 2,
+                    Latitude = 12.608647283636317,
+                    Longitude = -7.967574298381805
+                },
+                new Node()
+                {
+                    Id = 3,
+                    Latitude = 12.609173405500497,
+                    Longitude = -7.966713309288025
+                },
+                new Way()
+                {
+                    Id = 1,
+                    Nodes = new List<long>(new long[]
+                    {
+                        1, 2
+                    }),
+                    Tags = new TagsCollection(
+                        Tag.Create("highway", "residential"),
+                        Tag.Create("bicycle", "use_sidepath"))
+                },
+                new Way()
+                {
+                    Id = 2,
+                    Nodes = new List<long>(new long[]
+                    {
+                        1, 3, 2
+                    }),
+                    Tags = new TagsCollection(
+                        Tag.Create("highway", "cycleway"))
+                }
+            }.ToOsmStreamSource();
+
+            // build router db.
+            var routerDb = new RouterDb();
+            routerDb.LoadOsmData(osmGeos, Vehicle.Car, Vehicle.Bicycle);
+
+            // test some routes.
+            var router = new Router(routerDb);
+
+            // confirm it's working for bicycles but that the cycleway is used.
+            var route = router.TryCalculate(Vehicle.Bicycle.Fastest(),
+                new GeoCoordinate(12.608657753733688, -7.966136634349823),
+                new GeoCoordinate(12.608647283636317, -7.967574298381805));
+            Assert.IsFalse(route.IsError);
+            Assert.IsTrue(route.Value.TotalDistance > 180);
+            route = router.TryCalculate(Vehicle.Bicycle.Fastest(),
+                new GeoCoordinate(12.608657753733688, -7.966136634349823),
+                new GeoCoordinate(12.608647283636317, -7.967574298381805));
+            Assert.IsFalse(route.IsError);
+            Assert.IsTrue(route.Value.TotalDistance > 180);
+
+            // confirm it's not working for cars.
+            route = router.TryCalculate(Vehicle.Car.Fastest(),
+                new GeoCoordinate(12.608657753733688, -7.966136634349823),
+                new GeoCoordinate(12.608647283636317, -7.967574298381805));
+            Assert.IsFalse(route.IsError);
+            Assert.IsTrue(route.Value.TotalDistance < 180);
+            route = router.TryCalculate(Vehicle.Car.Fastest(),
+                new GeoCoordinate(12.608657753733688, -7.966136634349823),
+                new GeoCoordinate(12.608647283636317, -7.967574298381805));
+            Assert.IsFalse(route.IsError);
+            Assert.IsTrue(route.Value.TotalDistance < 180);
+        }
     }
 }
