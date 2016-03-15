@@ -31,16 +31,13 @@ namespace OsmSharp.Routing.Osm
         /// Splits the given tags into a normalized version, profile tags, and the rest in metatags.
         /// </summary>
         public static bool Normalize(this TagsCollection tags, TagsCollection profileTags, 
-            TagsCollection metaTags)
+            TagsCollection metaTags, IEnumerable<Vehicle> vehicles)
         {
             string highway;
             if(!tags.TryGetValue("highway", out highway))
             { // there is no highway tag, don't continue the search.
                 return false;
             }
-
-            // normalize access tags.
-            var defaultAccess = tags.NormalizeAccess(profileTags, metaTags);
 
             // normalize maxspeed tags.
             tags.NormalizeMaxspeed(profileTags, metaTags);
@@ -60,9 +57,6 @@ namespace OsmSharp.Routing.Osm
                 case "trunk_link":
                 case "primary":
                 case "primary_link":
-                    tags.NormalizeFoot(profileTags, metaTags, false);
-                    tags.NormalizeBicycle(profileTags, metaTags, false);
-                    tags.NormalizeMotorvehicle(profileTags, metaTags, defaultAccess);
                     profileTags.Add("highway", highway);
                     break;
                 case "secondary":
@@ -76,98 +70,66 @@ namespace OsmSharp.Routing.Osm
                 case "services":
                 case "living_street":
                 case "track":
-                    tags.NormalizeFoot(profileTags, metaTags, defaultAccess);
-                    tags.NormalizeBicycle(profileTags, metaTags, defaultAccess);
-                    tags.NormalizeMotorvehicle(profileTags, metaTags, defaultAccess);
                     profileTags.Add("highway", highway);
                     break;
                 case "cycleway":
-                    tags.NormalizeFoot(profileTags, metaTags, defaultAccess);
-                    tags.NormalizeBicycle(profileTags, metaTags, defaultAccess);
-                    tags.NormalizeMotorvehicle(profileTags, metaTags, false);
                     profileTags.Add("highway", highway);
                     break;
                 case "path":
-                    tags.NormalizeFoot(profileTags, metaTags, defaultAccess);
-                    tags.NormalizeBicycle(profileTags, metaTags, defaultAccess);
-                    tags.NormalizeMotorvehicle(profileTags, metaTags, false);
                     profileTags.Add("highway", highway);
                     break;
                 case "pedestrian":
                 case "footway":
                 case "steps":
-                    tags.NormalizeFoot(profileTags, metaTags, defaultAccess);
-                    tags.NormalizeBicycle(profileTags, metaTags, false);
-                    tags.NormalizeMotorvehicle(profileTags, metaTags, false);
                     tags.NormalizeRamp(profileTags, metaTags, false);
                     profileTags.Add("highway", highway);
                     break;
             }
 
+            // normalize access tags.
+            foreach(var vehicle in vehicles)
+            {
+                tags.NormalizeAccess(vehicle, highway, profileTags);
+            }
+
             return true;
         }
 
-        private static Dictionary<string, bool?> _accessValues = null;
-
         /// <summary>
-        /// Gets the possible values for access.
+        /// Normalizes nothing but the access tags.
         /// </summary>
-        public static Dictionary<string, bool?> AccessValues
+        public static void NormalizeAccess(this TagsCollection tags, Vehicle vehicle, string highwayType, TagsCollection profileTags)
         {
-            get
-            {
-                if (_accessValues == null)
-                {
-                    _accessValues = new Dictionary<string, bool?>();
-                    _accessValues.Add("private", false);
-                    _accessValues.Add("yes", true);
-                    _accessValues.Add("no", false);
-                    _accessValues.Add("permissive", true);
-                    _accessValues.Add("destination", true);
-                    _accessValues.Add("customers", false);
-                    _accessValues.Add("agricultural", null);
-                    _accessValues.Add("forestry", null);
-                    _accessValues.Add("designated", true);
-                    _accessValues.Add("public", true);
-                    _accessValues.Add("discouraged", null);
-                    _accessValues.Add("delivery", true);
-                }
-                return _accessValues;
-            }
+            var access = vehicle.CanTraverse(new TagsCollection(Tag.Create("highway", highwayType)));
+            tags.NormalizeAccess(profileTags, access, vehicle.VehicleTypes.ToArray());
         }
 
         /// <summary>
-        /// Normalizes the access tags and adds them to the profile tags or meta tags.
+        /// Normalizes access for the given hierarchy of access tags.
         /// </summary>
-        /// <returns></returns>
-        public static bool NormalizeAccess(this TagsCollection tags, TagsCollection profileTags,
-            TagsCollection metaTags)
+        public static void NormalizeAccess(this TagsCollection tags, TagsCollection profileTags, bool defaultAccess, params string[] accessTags)
         {
-            string access;
-            if (!tags.TryGetValue("access", out access))
-            { // nothing to normalize.
-                return true;
-            }
-            bool? defaultAccessFound;
-            if (!AccessValues.TryGetValue(access, out defaultAccessFound))
-            { // invalid value.
-                return true;
+            bool? access = tags.InterpretAccessValue("access");
+            for(var i = 0; i < accessTags.Length; i++)
+            {
+                var currentAccess = tags.InterpretAccessValue(accessTags[i]);
+                if (currentAccess != null)
+                {
+                    access = currentAccess;
+                }
             }
 
-            if (!defaultAccessFound.HasValue)
-            { // access needs to be descided on a vehicle by vehicle basis.
-                profileTags.Add("access", access);
-                return true;
-            }
-            if (defaultAccessFound.Value)
+            if (access != null && access.Value != defaultAccess)
             {
-                profileTags.Add("access", "yes");
+                if (access.Value)
+                {
+                    profileTags.Add(accessTags[accessTags.Length - 1], "yes");
+                }
+                else
+                {
+                    profileTags.Add(accessTags[accessTags.Length - 1], "no");
+                }
             }
-            else
-            {
-                profileTags.Add("access", "no");
-            }
-            return defaultAccessFound.Value;
         }
 
         private static Dictionary<string, bool> _onewayValues = null;
@@ -279,104 +241,7 @@ namespace OsmSharp.Routing.Osm
                 profileTags.Add("junction", "roundabout");
             }
         }
-
-        private static Dictionary<string, bool?> _footValues = null;
-
-        /// <summary>
-        /// Gets the possible values for foots.
-        /// </summary>
-        public static Dictionary<string, bool?> FootValues
-        {
-            get
-            {
-                if (_footValues == null)
-                {
-                    _footValues = new Dictionary<string, bool?>();
-                    _footValues.Add("yes", true);
-                    _footValues.Add("designated", true);
-                    _footValues.Add("no", false);
-                    _footValues.Add("permissive", true);
-                    _footValues.Add("official", true);
-                    _footValues.Add("destination", true);
-                    _footValues.Add("private", false);
-                    _footValues.Add("use_sidewalk", true);
-                }
-                return _footValues;
-            }
-        }
-
-        /// <summary>
-        /// Normalizes the foot tag.
-        /// </summary>
-        public static void NormalizeFoot(this TagsCollection tags, TagsCollection profileTags,
-            TagsCollection metaTags, bool defaultAccess)
-        {
-            string foot;
-            if (!tags.TryGetValue("foot", out foot))
-            { // nothing to normalize.
-                return;
-            }
-            bool? defaultAccessFound;
-            if (!FootValues.TryGetValue(foot, out defaultAccessFound))
-            { // invalid value.
-                return;
-            }
-
-            if (defaultAccess != defaultAccessFound)
-            {
-                profileTags.Add("foot", foot);
-            }
-        }
-
-        private static Dictionary<string, bool?> _bicycleValues = null;
-
-        /// <summary>
-        /// Gets the possible values for bicycles.
-        /// </summary>
-        public static Dictionary<string, bool?> BicycleValues
-        {
-            get
-            {
-                if(_bicycleValues == null)
-                {
-                    _bicycleValues = new Dictionary<string, bool?>();
-                    _bicycleValues.Add("yes", true);
-                    _bicycleValues.Add("no", false);
-                    _bicycleValues.Add("designated", true);
-                    _bicycleValues.Add("dismount", null);
-                    _bicycleValues.Add("use_sidepath", true);
-                    _bicycleValues.Add("private", false);
-                    _bicycleValues.Add("official", true);
-                    _bicycleValues.Add("destination", true);
-                }
-                return _bicycleValues;
-            }
-        }
-
-        /// <summary>
-        /// Normalizes the bicycle tag.
-        /// </summary>
-        public static bool? NormalizeBicycle(this TagsCollection tags, TagsCollection profileTags,
-            TagsCollection metaTags, bool defaultAccess)
-        {
-            string bicycle;
-            if(!tags.TryGetValue("bicycle", out bicycle))
-            { // nothing to normalize.
-                return null;
-            }
-            bool? defaultAccessFound;
-            if(!BicycleValues.TryGetValue(bicycle, out defaultAccessFound))
-            { // invalid value.
-                return null;
-            }
-
-            if (defaultAccess != defaultAccessFound)
-            {
-                profileTags.Add("bicycle", bicycle);
-            }
-            return defaultAccessFound;
-        }
-
+        
         private static Dictionary<string, bool?> _rampValues = null;
 
         /// <summary>
@@ -415,56 +280,6 @@ namespace OsmSharp.Routing.Osm
             if (defaultAccess != defaultAccessFound)
             {
                 profileTags.Add("ramp", ramp);
-            }
-        }
-
-        private static Dictionary<string, bool?> _motorvehicleValues = null;
-
-        /// <summary>
-        /// Gets the possible values for motorvehicles.
-        /// </summary>
-        public static Dictionary<string, bool?> MotorvehicleValues
-        {
-            get
-            {
-                if (_motorvehicleValues == null)
-                {
-                    _motorvehicleValues = new Dictionary<string, bool?>();
-                    _motorvehicleValues.Add("no", false);
-                    _motorvehicleValues.Add("yes", true);
-                    _motorvehicleValues.Add("private", false);
-                    _motorvehicleValues.Add("agricultural", null);
-                    _motorvehicleValues.Add("destination", true);
-                    _motorvehicleValues.Add("forestry", null);
-                    _motorvehicleValues.Add("designated", true);
-                    _motorvehicleValues.Add("permissive", false);
-                    _motorvehicleValues.Add("delivery", null);
-                    _motorvehicleValues.Add("official", true);
-                }
-                return _motorvehicleValues;
-            }
-        }
-
-        /// <summary>
-        /// Normalizes the motorvehicle tag.
-        /// </summary>
-        public static void NormalizeMotorvehicle(this TagsCollection tags, TagsCollection profileTags,
-            TagsCollection metaTags, bool defaultAccess)
-        {
-            string motorvehicle;
-            if (!tags.TryGetValue("motorvehicle", out motorvehicle))
-            { // nothing to normalize.
-                return;
-            }
-            bool? defaultAccessFound;
-            if (!MotorvehicleValues.TryGetValue(motorvehicle, out defaultAccessFound))
-            { // invalid value.
-                return;
-            }
-
-            if (defaultAccess != defaultAccessFound)
-            {
-                profileTags.Add("motorvehicle", motorvehicle);
             }
         }
     }

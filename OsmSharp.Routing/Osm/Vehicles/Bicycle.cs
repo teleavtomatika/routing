@@ -49,6 +49,7 @@ namespace OsmSharp.Routing.Osm.Vehicles
             AccessibleTags.Add("tertiary", string.Empty);
             AccessibleTags.Add("tertiary_link", string.Empty);
 
+            VehicleTypes.Add("vehicle"); // a bicycle is a generic vehicle.
             VehicleTypes.Add("bicycle");
         }
 
@@ -57,6 +58,11 @@ namespace OsmSharp.Routing.Osm.Vehicles
         /// </summary>
         protected override bool IsVehicleAllowed(TagsCollectionBase tags, string highwayType)
         {
+            if (!tags.InterpretAccessValues(VehicleTypes, "access"))
+            {
+                return false;
+            }
+
             // do the designated tags.
             if (tags.ContainsKey("bicycle"))
             {

@@ -50,17 +50,19 @@ namespace OsmSharp.Routing.Osm.Vehicles
             AccessibleTags.Add("tertiary", string.Empty);
             AccessibleTags.Add("tertiary_link", string.Empty);
 
-            VehicleTypes.Add("pedestrian");
+            VehicleTypes.Add("foot");
         }
 
         /// <summary>
         /// Returns true if the vehicle is allowed on the way represented by these tags
         /// </summary>
-        /// <param name="tags"></param>
-        /// <param name="highwayType"></param>
-        /// <returns></returns>
         protected override bool IsVehicleAllowed(TagsCollectionBase tags, string highwayType)
         {
+            if (!tags.InterpretAccessValues(VehicleTypes, "access"))
+            {
+                return false;
+            }
+
             if (tags.ContainsKey("foot"))
             {
                 if (tags["foot"] == "designated")

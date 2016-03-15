@@ -331,7 +331,7 @@ namespace OsmSharp.Routing.Osm.Streams
                     if (_normalizeTags)
                     { // normalize profile tags.
                         var normalizedProfileTags = new TagsCollection(profileTags.Count);
-                        if (!profileTags.Normalize(normalizedProfileTags, metaTags))
+                        if (!profileTags.Normalize(normalizedProfileTags, metaTags, _vehicles))
                         { // invalid data, no access, or tags make no sense at all.
                             return;
                         }

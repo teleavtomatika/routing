@@ -34,26 +34,28 @@ namespace OsmSharp.Routing.Test.Osm
         [Test]
         public void TestHighway()
         {
+            Routing.Osm.Vehicles.Vehicle.RegisterVehicles();
+
             var tags = new TagsCollection();
             var profileTags = new TagsCollection();
             var metaTags = new TagsCollection();
 
-            Assert.IsFalse(tags.Normalize(profileTags, metaTags));
+            Assert.IsFalse(tags.Normalize(profileTags, metaTags, Routing.Osm.Vehicles.Vehicle.GetAllRegistered()));
 
             tags.Add(Tag.Create("highway", "residential"));
-            Assert.IsTrue(tags.Normalize(profileTags, metaTags));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags, Routing.Osm.Vehicles.Vehicle.GetAllRegistered()));
             Assert.IsTrue(profileTags.ContainsKeyValue("highway", "residential"));
             profileTags.Clear();
             tags.Clear();
 
             tags.Add(Tag.Create("highway", "footway"));
-            Assert.IsTrue(tags.Normalize(profileTags, metaTags));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags, Routing.Osm.Vehicles.Vehicle.GetAllRegistered()));
             Assert.IsTrue(profileTags.ContainsKeyValue("highway", "footway"));
             profileTags.Clear();
             tags.Clear();
 
             tags.Add(Tag.Create("highway", "motorway"));
-            Assert.IsTrue(tags.Normalize(profileTags, metaTags));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags, Routing.Osm.Vehicles.Vehicle.GetAllRegistered()));
             Assert.IsTrue(profileTags.ContainsKeyValue("highway", "motorway"));
             profileTags.Clear();
             tags.Clear();
@@ -65,13 +67,16 @@ namespace OsmSharp.Routing.Test.Osm
         [Test]
         public void TestBicycleRestrictions()
         {
+            Routing.Osm.Vehicles.Vehicle.RegisterVehicles();
+            var vehicles = new Routing.Osm.Vehicles.Vehicle[] { Routing.Osm.Vehicles.Vehicle.Bicycle };
+
             var tags = new TagsCollection();
             var profileTags = new TagsCollection();
             var metaTags = new TagsCollection();
 
             tags.Add(Tag.Create("highway", "residential"));
             tags.Add(Tag.Create("bicycle", "yes"));
-            Assert.IsTrue(tags.Normalize(profileTags, metaTags));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags, vehicles));
             Assert.IsTrue(profileTags.ContainsKeyValue("highway", "residential"));
             Assert.IsFalse(profileTags.ContainsKeyValue("bicycle", "yes"));
             profileTags.Clear();
@@ -79,7 +84,7 @@ namespace OsmSharp.Routing.Test.Osm
 
             tags.Add(Tag.Create("highway", "residential"));
             tags.Add(Tag.Create("bicycle", "no"));
-            Assert.IsTrue(tags.Normalize(profileTags, metaTags));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags, vehicles));
             Assert.IsTrue(profileTags.ContainsKeyValue("highway", "residential"));
             Assert.IsTrue(profileTags.ContainsKeyValue("bicycle", "no"));
             profileTags.Clear();
@@ -87,7 +92,7 @@ namespace OsmSharp.Routing.Test.Osm
 
             tags.Add(Tag.Create("highway", "residential"));
             tags.Add(Tag.Create("bicycle", "mistake"));
-            Assert.IsTrue(tags.Normalize(profileTags, metaTags));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags, vehicles));
             Assert.IsTrue(profileTags.ContainsKeyValue("highway", "residential"));
             Assert.IsFalse(profileTags.ContainsKeyValue("bicycle", "mistake"));
             profileTags.Clear();
@@ -95,8 +100,18 @@ namespace OsmSharp.Routing.Test.Osm
 
             tags.Add(Tag.Create("highway", "footway"));
             tags.Add(Tag.Create("bicycle", "no"));
-            Assert.IsTrue(tags.Normalize(profileTags, metaTags));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags, vehicles));
             Assert.IsTrue(profileTags.ContainsKeyValue("highway", "footway"));
+            Assert.IsFalse(profileTags.ContainsKeyValue("bicycle", "no"));
+            profileTags.Clear();
+            tags.Clear();
+
+            vehicles = new Routing.Osm.Vehicles.Vehicle[] { Routing.Osm.Vehicles.Vehicle.Car };
+            
+            tags.Add(Tag.Create("highway", "residential"));
+            tags.Add(Tag.Create("bicycle", "no"));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags, vehicles));
+            Assert.IsTrue(profileTags.ContainsKeyValue("highway", "residential"));
             Assert.IsFalse(profileTags.ContainsKeyValue("bicycle", "no"));
             profileTags.Clear();
             tags.Clear();
@@ -108,13 +123,16 @@ namespace OsmSharp.Routing.Test.Osm
         [Test]
         public void TestFootRestrictions()
         {
+            Routing.Osm.Vehicles.Vehicle.RegisterVehicles();
+            var vehicles = new Routing.Osm.Vehicles.Vehicle[] { Routing.Osm.Vehicles.Vehicle.Pedestrian };
+
             var tags = new TagsCollection();
             var profileTags = new TagsCollection();
             var metaTags = new TagsCollection();
 
             tags.Add(Tag.Create("highway", "residential"));
             tags.Add(Tag.Create("foot", "yes"));
-            Assert.IsTrue(tags.Normalize(profileTags, metaTags));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags, vehicles));
             Assert.IsTrue(profileTags.ContainsKeyValue("highway", "residential"));
             Assert.IsFalse(profileTags.ContainsKeyValue("foot", "yes"));
             profileTags.Clear();
@@ -122,7 +140,7 @@ namespace OsmSharp.Routing.Test.Osm
 
             tags.Add(Tag.Create("highway", "residential"));
             tags.Add(Tag.Create("foot", "no"));
-            Assert.IsTrue(tags.Normalize(profileTags, metaTags));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags, vehicles));
             Assert.IsTrue(profileTags.ContainsKeyValue("highway", "residential"));
             Assert.IsTrue(profileTags.ContainsKeyValue("foot", "no"));
             profileTags.Clear();
@@ -130,7 +148,7 @@ namespace OsmSharp.Routing.Test.Osm
 
             tags.Add(Tag.Create("highway", "residential"));
             tags.Add(Tag.Create("foot", "mistake"));
-            Assert.IsTrue(tags.Normalize(profileTags, metaTags));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags, vehicles));
             Assert.IsTrue(profileTags.ContainsKeyValue("highway", "residential"));
             Assert.IsFalse(profileTags.ContainsKeyValue("foot", "mistake"));
             profileTags.Clear();
@@ -138,9 +156,29 @@ namespace OsmSharp.Routing.Test.Osm
 
             tags.Add(Tag.Create("highway", "cycleway"));
             tags.Add(Tag.Create("foot", "no"));
-            Assert.IsTrue(tags.Normalize(profileTags, metaTags));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags, vehicles));
             Assert.IsTrue(profileTags.ContainsKeyValue("highway", "cycleway"));
             Assert.IsTrue(profileTags.ContainsKeyValue("foot", "no"));
+            profileTags.Clear();
+            tags.Clear();
+
+            vehicles = new Routing.Osm.Vehicles.Vehicle[] { Routing.Osm.Vehicles.Vehicle.Car };
+            
+            tags.Add(Tag.Create("highway", "residential"));
+            tags.Add(Tag.Create("foot", "no"));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags, vehicles));
+            Assert.IsTrue(profileTags.ContainsKeyValue("highway", "residential"));
+            Assert.IsFalse(profileTags.ContainsKeyValue("foot", "no"));
+            profileTags.Clear();
+            tags.Clear();
+
+            vehicles = new Routing.Osm.Vehicles.Vehicle[] { Routing.Osm.Vehicles.Vehicle.Bicycle };
+
+            tags.Add(Tag.Create("highway", "cycleway"));
+            tags.Add(Tag.Create("foot", "no"));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags, vehicles));
+            Assert.IsTrue(profileTags.ContainsKeyValue("highway", "cycleway"));
+            Assert.IsFalse(profileTags.ContainsKeyValue("foot", "no"));
             profileTags.Clear();
             tags.Clear();
         }
@@ -151,39 +189,42 @@ namespace OsmSharp.Routing.Test.Osm
         [Test]
         public void TestMotorvehicleRestrictions()
         {
+            Routing.Osm.Vehicles.Vehicle.RegisterVehicles();
+            var vehicles = new Routing.Osm.Vehicles.Vehicle[] { Routing.Osm.Vehicles.Vehicle.Car };
+
             var tags = new TagsCollection();
             var profileTags = new TagsCollection();
             var metaTags = new TagsCollection();
 
             tags.Add(Tag.Create("highway", "residential"));
-            tags.Add(Tag.Create("motorvehicle", "yes"));
-            Assert.IsTrue(tags.Normalize(profileTags, metaTags));
+            tags.Add(Tag.Create("motor_vehicle", "yes"));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags, vehicles));
             Assert.IsTrue(profileTags.ContainsKeyValue("highway", "residential"));
-            Assert.IsFalse(profileTags.ContainsKeyValue("motorvehicle", "yes"));
+            Assert.IsFalse(profileTags.ContainsKeyValue("motor_vehicle", "yes"));
             profileTags.Clear();
             tags.Clear();
 
             tags.Add(Tag.Create("highway", "residential"));
-            tags.Add(Tag.Create("motorvehicle", "no"));
-            Assert.IsTrue(tags.Normalize(profileTags, metaTags));
+            tags.Add(Tag.Create("motor_vehicle", "no"));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags, vehicles));
             Assert.IsTrue(profileTags.ContainsKeyValue("highway", "residential"));
-            Assert.IsTrue(profileTags.ContainsKeyValue("motorvehicle", "no"));
+            Assert.IsTrue(profileTags.ContainsKeyValue("motorcar", "no"));
             profileTags.Clear();
             tags.Clear();
 
             tags.Add(Tag.Create("highway", "residential"));
-            tags.Add(Tag.Create("motorvehicle", "mistake"));
-            Assert.IsTrue(tags.Normalize(profileTags, metaTags));
+            tags.Add(Tag.Create("motor_vehicle", "mistake"));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags, vehicles));
             Assert.IsTrue(profileTags.ContainsKeyValue("highway", "residential"));
-            Assert.IsFalse(profileTags.ContainsKeyValue("motorvehicle", "mistake"));
+            Assert.IsFalse(profileTags.ContainsKeyValue("motor_vehicle", "mistake"));
             profileTags.Clear();
             tags.Clear();
 
             tags.Add(Tag.Create("highway", "cycleway"));
-            tags.Add(Tag.Create("motorvehicle", "no"));
-            Assert.IsTrue(tags.Normalize(profileTags, metaTags));
+            tags.Add(Tag.Create("motor_vehicle", "no"));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags, vehicles));
             Assert.IsTrue(profileTags.ContainsKeyValue("highway", "cycleway"));
-            Assert.IsFalse(profileTags.ContainsKeyValue("motorvehicle", "no"));
+            Assert.IsFalse(profileTags.ContainsKeyValue("motorcar", "no"));
             profileTags.Clear();
             tags.Clear();
         }
@@ -194,13 +235,15 @@ namespace OsmSharp.Routing.Test.Osm
         [Test]
         public void TestOnewayRestrictions()
         {
+            Routing.Osm.Vehicles.Vehicle.RegisterVehicles();
+
             var tags = new TagsCollection();
             var profileTags = new TagsCollection();
             var metaTags = new TagsCollection();
 
             tags.Add(Tag.Create("highway", "residential"));
             tags.Add(Tag.Create("oneway", "no"));
-            Assert.IsTrue(tags.Normalize(profileTags, metaTags));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags, Routing.Osm.Vehicles.Vehicle.GetAllRegistered()));
             Assert.IsTrue(profileTags.ContainsKeyValue("highway", "residential"));
             Assert.IsFalse(profileTags.ContainsKeyValue("oneway", "no"));
             profileTags.Clear();
@@ -208,7 +251,7 @@ namespace OsmSharp.Routing.Test.Osm
 
             tags.Add(Tag.Create("highway", "residential"));
             tags.Add(Tag.Create("oneway", "yes"));
-            Assert.IsTrue(tags.Normalize(profileTags, metaTags));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags, Routing.Osm.Vehicles.Vehicle.GetAllRegistered()));
             Assert.IsTrue(profileTags.ContainsKeyValue("highway", "residential"));
             Assert.IsTrue(profileTags.ContainsKeyValue("oneway", "yes"));
             profileTags.Clear();
@@ -216,7 +259,7 @@ namespace OsmSharp.Routing.Test.Osm
 
             tags.Add(Tag.Create("highway", "residential"));
             tags.Add(Tag.Create("oneway", "-1"));
-            Assert.IsTrue(tags.Normalize(profileTags, metaTags));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags, Routing.Osm.Vehicles.Vehicle.GetAllRegistered()));
             Assert.IsTrue(profileTags.ContainsKeyValue("highway", "residential"));
             Assert.IsTrue(profileTags.ContainsKeyValue("oneway", "-1"));
             profileTags.Clear();
@@ -229,21 +272,23 @@ namespace OsmSharp.Routing.Test.Osm
         [Test]
         public void TestAccessRestrictions()
         {
+            Routing.Osm.Vehicles.Vehicle.RegisterVehicles();
+
             var tags = new TagsCollection();
             var profileTags = new TagsCollection();
             var metaTags = new TagsCollection();
 
             tags.Add(Tag.Create("highway", "residential"));
             tags.Add(Tag.Create("access", "yes"));
-            Assert.IsTrue(tags.Normalize(profileTags, metaTags));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags, Routing.Osm.Vehicles.Vehicle.GetAllRegistered()));
             Assert.IsTrue(profileTags.ContainsKeyValue("highway", "residential"));
-            Assert.IsTrue(profileTags.ContainsKeyValue("access", "yes"));
+            Assert.IsFalse(profileTags.ContainsKeyValue("access", "yes"));
             profileTags.Clear();
             tags.Clear();
 
             tags.Add(Tag.Create("highway", "residential"));
             tags.Add(Tag.Create("access", "mistake"));
-            Assert.IsTrue(tags.Normalize(profileTags, metaTags));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags, Routing.Osm.Vehicles.Vehicle.GetAllRegistered()));
             Assert.IsTrue(profileTags.ContainsKeyValue("highway", "residential"));
             Assert.IsFalse(profileTags.ContainsKeyValue("access", "mistake"));
             profileTags.Clear();
@@ -256,13 +301,15 @@ namespace OsmSharp.Routing.Test.Osm
         [Test]
         public void TestJunction()
         {
+            Routing.Osm.Vehicles.Vehicle.RegisterVehicles();
+
             var tags = new TagsCollection();
             var profileTags = new TagsCollection();
             var metaTags = new TagsCollection();
 
             tags.Add(Tag.Create("highway", "residential"));
             tags.Add(Tag.Create("junction", "roundabout"));
-            Assert.IsTrue(tags.Normalize(profileTags, metaTags));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags, Routing.Osm.Vehicles.Vehicle.GetAllRegistered()));
             Assert.IsTrue(profileTags.ContainsKeyValue("highway", "residential"));
             Assert.IsTrue(profileTags.ContainsKeyValue("junction", "roundabout"));
             profileTags.Clear();
@@ -270,7 +317,7 @@ namespace OsmSharp.Routing.Test.Osm
 
             tags.Add(Tag.Create("highway", "residential"));
             tags.Add(Tag.Create("junction", "mistake"));
-            Assert.IsTrue(tags.Normalize(profileTags, metaTags));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags, Routing.Osm.Vehicles.Vehicle.GetAllRegistered()));
             Assert.IsTrue(profileTags.ContainsKeyValue("highway", "residential"));
             Assert.IsFalse(profileTags.ContainsKeyValue("junction", "mistake"));
             profileTags.Clear();
@@ -283,13 +330,15 @@ namespace OsmSharp.Routing.Test.Osm
         [Test]
         public void TestMaxspeed()
         {
+            Routing.Osm.Vehicles.Vehicle.RegisterVehicles();
+
             var tags = new TagsCollection();
             var profileTags = new TagsCollection();
             var metaTags = new TagsCollection();
 
             tags.Add(Tag.Create("highway", "residential"));
             tags.Add(Tag.Create("maxspeed", "50"));
-            Assert.IsTrue(tags.Normalize(profileTags, metaTags));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags, Routing.Osm.Vehicles.Vehicle.GetAllRegistered()));
             Assert.IsTrue(profileTags.ContainsKeyValue("highway", "residential"));
             Assert.IsTrue(profileTags.ContainsKeyValue("maxspeed", "50"));
             profileTags.Clear();
@@ -297,7 +346,7 @@ namespace OsmSharp.Routing.Test.Osm
 
             tags.Add(Tag.Create("highway", "residential"));
             tags.Add(Tag.Create("maxspeed", "mistake"));
-            Assert.IsTrue(tags.Normalize(profileTags, metaTags));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags, Routing.Osm.Vehicles.Vehicle.GetAllRegistered()));
             Assert.IsTrue(profileTags.ContainsKeyValue("highway", "residential"));
             Assert.IsFalse(profileTags.ContainsKeyValue("maxspeed", "mistake"));
             profileTags.Clear();
@@ -305,7 +354,7 @@ namespace OsmSharp.Routing.Test.Osm
 
             tags.Add(Tag.Create("highway", "residential"));
             tags.Add(Tag.Create("maxspeed", "50 mph"));
-            Assert.IsTrue(tags.Normalize(profileTags, metaTags));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags, Routing.Osm.Vehicles.Vehicle.GetAllRegistered()));
             Assert.IsTrue(profileTags.ContainsKeyValue("highway", "residential"));
             Assert.IsTrue(profileTags.ContainsKeyValue("maxspeed", "50 mph"));
             profileTags.Clear();
@@ -318,15 +367,64 @@ namespace OsmSharp.Routing.Test.Osm
         [Test]
         public void TestRamp()
         {
+            Routing.Osm.Vehicles.Vehicle.RegisterVehicles();
+
             var tags = new TagsCollection();
             var profileTags = new TagsCollection();
             var metaTags = new TagsCollection();
 
             tags.Add(Tag.Create("highway", "steps"));
             tags.Add(Tag.Create("ramp", "yes"));
-            Assert.IsTrue(tags.Normalize(profileTags, metaTags));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags, Routing.Osm.Vehicles.Vehicle.GetAllRegistered()));
             Assert.IsTrue(profileTags.ContainsKeyValue("highway", "steps"));
             Assert.IsTrue(profileTags.ContainsKeyValue("ramp", "yes"));
+            profileTags.Clear();
+            tags.Clear();
+        }
+
+        /// <summary>
+        /// Tests motorway access tags.
+        /// </summary>
+        [Test]
+        public void TestMotorwayAccess()
+        {
+            Routing.Osm.Vehicles.Vehicle.RegisterVehicles();
+            var vehicles = new Routing.Osm.Vehicles.Vehicle[] {
+                Routing.Osm.Vehicles.Vehicle.Pedestrian,
+                Routing.Osm.Vehicles.Vehicle.Bicycle,
+                Routing.Osm.Vehicles.Vehicle.Car
+            };
+
+            var tags = new TagsCollection();
+            var profileTags = new TagsCollection();
+            var metaTags = new TagsCollection();
+
+            tags.Add(Tag.Create("highway", "motorway"));
+            tags.Add(Tag.Create("access", "no"));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags, vehicles));
+            Assert.AreEqual(2, profileTags.Count);
+            Assert.IsTrue(profileTags.ContainsKeyValue("highway", "motorway"));
+            Assert.IsTrue(profileTags.ContainsKeyValue("motorcar", "no"));
+            profileTags.Clear();
+            tags.Clear();
+
+            tags.Add(Tag.Create("highway", "motorway"));
+            tags.Add(Tag.Create("access", "yes"));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags, vehicles));
+            Assert.AreEqual(3, profileTags.Count);
+            Assert.IsTrue(profileTags.ContainsKeyValue("highway", "motorway"));
+            Assert.IsTrue(profileTags.ContainsKeyValue("bicycle", "yes"));
+            Assert.IsTrue(profileTags.ContainsKeyValue("foot", "yes"));
+            profileTags.Clear();
+            tags.Clear();
+
+            tags.Add(Tag.Create("highway", "motorway"));
+            tags.Add(Tag.Create("access", "no"));
+            tags.Add(Tag.Create("vehicle", "yes"));
+            Assert.IsTrue(tags.Normalize(profileTags, metaTags, vehicles));
+            Assert.AreEqual(2, profileTags.Count);
+            Assert.IsTrue(profileTags.ContainsKeyValue("highway", "motorway"));
+            Assert.IsTrue(profileTags.ContainsKeyValue("bicycle", "yes"));
             profileTags.Clear();
             tags.Clear();
         }

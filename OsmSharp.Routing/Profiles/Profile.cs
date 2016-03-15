@@ -33,14 +33,14 @@ namespace OsmSharp.Routing.Profiles
         private readonly Func<TagsCollectionBase, bool> _canStop;
         private readonly Func<TagsCollectionBase, TagsCollectionBase, bool> _equals;
         private readonly Func<Speed> _minSpeed;
-        private readonly HashSet<string> _vehicleTypes;
+        private readonly List<string> _vehicleTypes;
         private readonly ProfileMetric _metric;
 
         /// <summary>
         /// Creates a new routing profile.
         /// </summary>
         public Profile(string name, Func<TagsCollectionBase, Speed> getSpeed, Func<Speed> minSpeed, Func<TagsCollectionBase, bool> canStop,
-            Func<TagsCollectionBase, TagsCollectionBase, bool> equals, HashSet<string> vehicleTypes, ProfileMetric metric)
+            Func<TagsCollectionBase, TagsCollectionBase, bool> equals, List<string> vehicleTypes, ProfileMetric metric)
         {
             if (metric == ProfileMetric.Custom)
             {
@@ -61,7 +61,7 @@ namespace OsmSharp.Routing.Profiles
         /// Creates a new routing profile.
         /// </summary>
         public Profile(string name, Func<TagsCollectionBase, Speed> getSpeed, Func<Speed> minSpeed, Func<TagsCollectionBase, bool> canStop,
-            Func<TagsCollectionBase, TagsCollectionBase, bool> equals, HashSet<string> vehicleTypes, Func<TagsCollectionBase, Factor> getFactor)
+            Func<TagsCollectionBase, TagsCollectionBase, bool> equals, List<string> vehicleTypes, Func<TagsCollectionBase, Factor> getFactor)
         {
             _minSpeed = minSpeed;
             _getSpeed = getSpeed;
@@ -172,7 +172,7 @@ namespace OsmSharp.Routing.Profiles
         /// <summary>
         /// Gets the vehicle types.
         /// </summary>
-        public virtual HashSet<string> VehicleType
+        public virtual List<string> VehicleType
         {
             get
             {
