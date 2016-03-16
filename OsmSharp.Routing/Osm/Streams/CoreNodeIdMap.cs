@@ -18,6 +18,7 @@
 
 using OsmSharp.Collections;
 using System;
+using System.Collections.Generic;
 
 namespace OsmSharp.Routing.Osm.Streams
 {
@@ -131,6 +132,17 @@ namespace OsmSharp.Routing.Osm.Streams
                 }
             }
             return max;
+        }
+
+        /// <summary>
+        /// An enumerable with all nodes in this map.
+        /// </summary>
+        public IEnumerable<long> Nodes
+        {
+            get
+            {
+                return _firstMap.Keys;
+            }
         }
 
         private class LinkedListNode
