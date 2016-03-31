@@ -359,7 +359,7 @@ namespace OsmSharp.Routing.Test.Osm
 
             // build router db.
             var routerDb = new RouterDb();
-            routerDb.LoadOsmData(osmGeos, Vehicle.Car, Vehicle.Bicycle, Vehicle.Pedestrian);
+            routerDb.LoadOsmData(osmGeos, Vehicle.Car, Vehicle.Bicycle);
 
             // test some routes.
             var router = new Router(routerDb);

@@ -526,15 +526,15 @@ namespace OsmSharp.Routing.Osm.Streams
                                     var newFromVertex = this.AddNewCoreNode(fromNode, fromLocation.Latitude, fromLocation.Longitude);
                                     this.AddCoreEdge(fromVertex, newFromVertex, new EdgeData()
                                     {
-                                        Distance = 0,
+                                        Distance = 0f,
                                         MetaId = splitMeta,
                                         Profile = (ushort)splitProfile
                                     }, null);
                                     var toLocation = _db.Network.GetVertex(toVertex);
-                                    var newToVertex = this.AddNewCoreNode(toNode, fromLocation.Latitude, fromLocation.Longitude);
+                                    var newToVertex = this.AddNewCoreNode(toNode, toLocation.Latitude, toLocation.Longitude);
                                     this.AddCoreEdge(newToVertex, toVertex, new EdgeData()
                                     {
-                                        Distance = 0,
+                                        Distance = 0f,
                                         MetaId = splitMeta,
                                         Profile = (ushort)splitProfile
                                     }, null);
