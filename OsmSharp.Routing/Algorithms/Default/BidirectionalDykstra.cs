@@ -55,7 +55,7 @@ namespace OsmSharp.Routing.Algorithms.Default
             _sourceSearch.WasFound = (vertex, weight) =>
             {
                 _maxForward = weight;
-                return false;
+                return this.ReachedVertexForward((uint)vertex, weight);
             };
             _targetSearch.WasFound = (vertex, weight) =>
             {
@@ -85,6 +85,26 @@ namespace OsmSharp.Routing.Algorithms.Default
                     break;
                 }
             }
+        }
+
+        /// <summary>
+        /// Called when a vertex was reached during a forward search.
+        /// </summary>
+        private bool ReachedVertexForward(uint vertex, float weight)
+        {
+            // check backward search for the same vertex.
+            Path backwardVisit;
+            if (_targetSearch.TryGetVisit(vertex, out backwardVisit))
+            { // there is a status for this vertex in the source search.
+                weight = weight + backwardVisit.Weight;
+                if (weight < _bestWeight)
+                { // this vertex is a better match.
+                    _bestWeight = weight;
+                    _bestVertex = vertex;
+                    this.HasSucceeded = true;
+                }
+            }
+            return false;
         }
 
         /// <summary>

@@ -59,16 +59,6 @@ namespace OsmSharp.Routing.Test.Functional
                 featureCollection = OsmSharp.Geo.Streams.GeoJson.GeoJsonConverter.ToFeatureCollection(stream.ReadToEnd());
             }
 
-            //var performanceInfoConsumer = new PerformanceInfoConsumer(embeddedResourceId);
-            //performanceInfoConsumer.Start();
-
-            //for (var i = 0; i < 10000; i++)
-            //{
-            //    Tests.Runner.TestResolve(router, featureCollection,
-            //        Tests.Runner.Default);
-            //}
-            //performanceInfoConsumer.Stop();
-
             var performanceInfoConsumer = new PerformanceInfoConsumer("Routing");
             performanceInfoConsumer.Start();
 
