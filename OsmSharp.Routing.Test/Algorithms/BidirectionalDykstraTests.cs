@@ -268,7 +268,7 @@ namespace OsmSharp.Routing.Test.Algorithms
             Assert.IsTrue(algorithm.HasRun);
             Assert.IsTrue(algorithm.HasSucceeded);
 
-            Assert.AreEqual(1, algorithm.BestVertex);
+            Assert.AreEqual(2, algorithm.BestVertex);
             Assert.AreEqual(new uint[] { 0, 1, 2, 3 }, algorithm.GetPath().ToArray());
 
             // run algorithm.
@@ -387,7 +387,7 @@ namespace OsmSharp.Routing.Test.Algorithms
             Assert.IsTrue(algorithm.HasRun);
             Assert.IsTrue(algorithm.HasSucceeded);
 
-            Assert.AreEqual(1, algorithm.BestVertex);
+            Assert.AreEqual(2, algorithm.BestVertex);
             Assert.AreEqual(new uint[] { 0, 1, 2, 3 }, algorithm.GetPath().ToArray());
 
             // run algorithm.
