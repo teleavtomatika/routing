@@ -22,10 +22,20 @@
         </dependencies>
     </metadata>
     <files>
-        <file src="Output\OsmSharp.Routing.dll" target="lib\portable-net40+sl4+win8+wp7\OsmSharp.Routing.dll" />
-        <file src="Output\OsmSharp.Routing.dll" target="lib\net40\OsmSharp.Routing.dll" />
-        <file src="Output\OsmSharp.Routing.dll" target="lib\net45\OsmSharp.Routing.dll" />
-	      <file src="Output\OsmSharp.Routing.dll" target="lib\MonoAndroid\OsmSharp.Routing.dll" />
-	      <file src="Output\OsmSharp.Routing.dll" target="lib\Xamarin.iOS10\OsmSharp.Routing.dll" />
+		<file src="Output\OsmSharp.Routing.dll" target="lib\portable-net40+sl4+win8+wp7\OsmSharp.Routing.dll" />
+		<file src="Output\OsmSharp.Routing.pdb" target="lib\portable-net40+sl4+win8+wp7\OsmSharp.Routing.pdb" />
+		<file src="Output\OsmSharp.Routing.xml" target="lib\portable-net40+sl4+win8+wp7\OsmSharp.Routing.xml" />
+		<file src="Output\OsmSharp.Routing.dll" target="lib\net40\OsmSharp.Routing.dll" />
+		<file src="Output\OsmSharp.Routing.pdb" target="lib\net40\OsmSharp.Routing.pdb" />
+		<file src="Output\OsmSharp.Routing.xml" target="lib\net40\OsmSharp.Routing.xml" />
+		<file src="Output\OsmSharp.Routing.dll" target="lib\net45\OsmSharp.Routing.dll" />
+		<file src="Output\OsmSharp.Routing.pdb" target="lib\net45\OsmSharp.Routing.pdb" />
+		<file src="Output\OsmSharp.Routing.xml" target="lib\net45\OsmSharp.Routing.xml" />
+		<file src="Output\OsmSharp.Routing.dll" target="lib\MonoAndroid\OsmSharp.Routing.dll" />
+		<file src="Output\OsmSharp.Routing.pdb" target="lib\MonoAndroid\OsmSharp.Routing.pdb" />
+		<file src="Output\OsmSharp.Routing.xml" target="lib\MonoAndroid\OsmSharp.Routing.xml" />
+		<file src="Output\OsmSharp.Routing.dll" target="lib\Xamarin.iOS10\OsmSharp.Routing.dll" />
+		<file src="Output\OsmSharp.Routing.pdb" target="lib\Xamarin.iOS10\OsmSharp.Routing.pdb" />
+		<file src="Output\OsmSharp.Routing.xml" target="lib\Xamarin.iOS10\OsmSharp.Routing.xml" />
     </files>
 </package>
